@@ -1542,7 +1542,8 @@ let lastTtsDetail = "";
 
 function renderAudioPanel(){
   rerender = renderAudioPanel;
-  const keyMask = ttsKey ? (ttsKey.slice(0,6) + "…" + ttsKey.slice(-4) + " (" + ttsKey.length + " chars)") : "— none set —";
+  const keyShow = ttsKey ? (ttsKey.slice(0,14) + "…" + ttsKey.slice(-6) + "  (" + ttsKey.length + " chars, starts with '" + ttsKey.slice(0,3) + "')") : "— none set —";
+  const keyWarn = ttsKey && !ttsKey.startsWith("sk_") ? `<div style="color:var(--rojo);font-size:13px;margin-top:6px">⚠ Your key does NOT start with 'sk_'. ElevenLabs API keys start with 'sk_' — you may have pasted the Key ID instead of the actual API key. Go to the API keys page, click 'Show' or the eye icon to REVEAL the key (or click Create to make a new one), then copy the full string.</div>` : "";
   const statusColor = lastTtsStatus==="ok" ? "var(--verde)" : lastTtsStatus==="error" ? "var(--rojo)" : "var(--muted)";
   h(`${topbar()}
   <div class="crumb"><button onclick="goHome()">← Home</button><span>Audio setup</span></div>
@@ -1561,7 +1562,8 @@ function renderAudioPanel(){
     <li><b>Paste key below and test:</b></li>
   </ol>
 
-  <label style="display:block;margin-bottom:8px;font-size:13px;color:var(--muted)">Current key: <span style="color:var(--chalk);font-family:monospace">${keyMask}</span></label>
+  <label style="display:block;margin-bottom:8px;font-size:13px;color:var(--muted)">Current key: <span style="color:var(--chalk);font-family:monospace;word-break:break-all">${keyShow}</span></label>
+  ${keyWarn}
   <input id="tts-key-input" type="password" placeholder="sk_..." style="width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--board2);color:var(--chalk);margin-bottom:14px;font-family:monospace;font-size:13px" value="">
 
   <div class="drill-actions" style="margin-bottom:20px">
