@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dieciséis v2 · Spanish, the 16-lesson way</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --board:#1C2B26; --board2:#24362F; --board3:#2C4139; --line:#3A5248;
+  --chalk:#F1EFE6; --muted:#93A79D; --saffron:#F2B441; --azul:#6FB8D6;
+  --rojo:#E2694F; --verde:#7FC98B; --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--board);color:var(--chalk);font-family:'Archivo',system-ui,sans-serif;font-size:16px;line-height:1.5;
+background-image:radial-gradient(ellipse at 20% 0%, rgba(255,255,255,0.03), transparent 55%);}
+#app{max-width:760px;margin:0 auto;padding:0 16px 90px}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 0 10px;position:sticky;top:0;background:var(--board);z-index:10;border-bottom:1px solid var(--line);margin-bottom:18px}
+.brand{display:flex;align-items:baseline;gap:10px;cursor:pointer}
+.brand h1{font-weight:900;font-stretch:110%;font-size:22px;letter-spacing:.5px;color:var(--saffron)}
+.brand span{font-size:12px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
+.top-actions{display:flex;gap:8px}
+.chip{font-size:12px;letter-spacing:.06em;padding:12px 12px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid var(--line);color:var(--chalk);background:var(--board2);transition:background .15s}
+.chip:hover{background:var(--board3)}
+.chip.on{background:var(--saffron);color:#1C2B26;border-color:var(--saffron);font-weight:700}
+.hero{margin:6px 0 22px}
+.hero h2{font-weight:900;font-stretch:115%;font-size:clamp(28px,6vw,40px);line-height:1.08}
+.hero h2 em{font-style:normal;color:var(--saffron)}
+.hero p{color:var(--muted);margin-top:10px;max-width:56ch;font-size:15px}
+.progress-line{margin:16px 0 4px;font-size:13px;color:var(--muted)}
+.progress-track{height:6px;background:var(--board2);border-radius:99px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--saffron),var(--verde));width:0%;transition:width .4s}
+.grid16{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:22px}
+@media(max-width:520px){.grid16{grid-template-columns:repeat(2,1fr)}}
+.cell{background:var(--board2);border:1px solid var(--line);border-radius:var(--radius);padding:14px 12px;min-height:108px;display:flex;flex-direction:column;justify-content:space-between;text-align:left;transition:transform .12s,background .15s;position:relative;overflow:hidden}
+.cell:hover{background:var(--board3);transform:translateY(-2px)}
+.cell .num{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--saffron)}
+.cell .t{font-weight:700;font-size:14px;line-height:1.25;margin-top:6px}
+.cell .s{font-size:11px;color:var(--muted);margin-top:4px}
+.cell .done-mark{position:absolute;top:10px;right:12px;font-size:13px;color:var(--verde)}
+.tools-row{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap}
+.tool-btn{flex:1;min-width:200px;background:var(--board2);border:1px solid var(--line);border-radius:var(--radius);padding:16px;text-align:left;transition:background .15s}
+.tool-btn:hover{background:var(--board3)}
+.tool-btn .tt{font-weight:800;color:var(--azul);font-size:15px}
+.tool-btn .ts{font-size:12.5px;color:var(--muted);margin-top:4px}
+.crumb{display:flex;align-items:center;gap:10px;margin:4px 0 14px;font-size:13px;color:var(--muted)}
+.crumb button{color:var(--azul);font-size:13px}
+.lesson-head h2{font-weight:900;font-stretch:112%;font-size:clamp(22px,5vw,30px)}
+.lesson-head .sub{color:var(--muted);font-size:14px;margin-top:4px}
+.tabs{display:flex;gap:6px;margin:18px 0 16px;border-bottom:1px solid var(--line)}
+.tab{padding:12px 14px;min-height:44px;display:flex;align-items:center;font-size:14px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab.on{color:var(--saffron);border-bottom-color:var(--saffron)}
+.note{background:var(--board2);border:1px solid var(--line);border-left:3px solid var(--azul);border-radius:0 var(--radius) var(--radius) 0;padding:14px 16px;font-size:14.5px;margin-bottom:16px}
+.note b{color:var(--azul)}
+.matrix{background:var(--board2);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:16px}
+.matrix h4{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--saffron);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.matrix table{width:100%;border-collapse:collapse;font-family:'IBM Plex Mono',monospace;font-size:14.5px}
+.matrix td{padding:7px 8px;border-bottom:1px dashed var(--line)}
+.matrix tr:last-child td{border-bottom:none}
+.matrix td.pron{color:var(--muted);width:44%}
+.matrix td.form{color:var(--chalk);font-weight:600}
+.vocab-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+@media(max-width:520px){.vocab-list{grid-template-columns:1fr}}
+.vword{background:var(--board2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;display:flex;justify-content:space-between;gap:8px;align-items:baseline;cursor:pointer;transition:background .12s}
+.vword:hover{background:var(--board3)}
+.vword .es{font-weight:700}
+.vword .es::after{content:" ♪";color:var(--muted);font-size:11px}
+.vword .tr{color:var(--muted);font-size:12.5px;text-align:right}
+.drill-card{background:var(--board2);border:1px solid var(--line);border-radius:var(--radius);padding:24px 18px;text-align:center;min-height:170px;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.drill-count{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted)}
+.drill-task{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--rojo)}
+.drill-prompt{font-size:clamp(18px,4.2vw,23px);font-weight:700;line-height:1.35;white-space:pre-line}
+.drill-hint{font-size:14px;color:var(--muted);white-space:pre-line}
+.drill-answer{font-size:clamp(18px,4.2vw,24px);font-weight:800;color:var(--saffron);font-family:'IBM Plex Mono',monospace;line-height:1.4;white-space:pre-line}
+.drill-actions{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.btn{padding:12px 20px;border-radius:12px;font-size:15px;font-weight:700;background:var(--board3);border:1px solid var(--line);transition:transform .1s}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--saffron);color:#1C2B26;border-color:var(--saffron)}
+.btn.good{background:var(--verde);color:#14231A;border-color:var(--verde)}
+.btn.again{background:var(--board2);color:var(--rojo);border-color:var(--rojo)}
+.btn.small{padding:8px 14px;font-size:13px}
+.drill-done{text-align:center;padding:36px 16px;background:var(--board2);border:1px solid var(--line);border-radius:var(--radius)}
+.drill-done h3{color:var(--verde);font-size:22px;font-weight:900}
+.drill-done p{color:var(--muted);font-size:14px;margin-top:6px}
+/* tiles */
+.tile-zone{min-height:56px;background:var(--board3);border:1px dashed var(--line);border-radius:12px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;margin-top:14px}
+.tile-zone.answer{border-style:solid;border-color:var(--saffron)}
+.tile-zone.correct-zone{border-color:var(--verde)}
+.tile-zone.wrong-zone{border-color:var(--rojo);animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.tile{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:15px;padding:9px 13px;border-radius:9px;background:var(--board);border:1px solid var(--line);transition:transform .1s}
+.tile:active{transform:scale(.95)}
+.tile.in-answer{background:var(--board2);border-color:var(--saffron)}
+.zone-label{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:14px;text-align:left}
+.q-question{font-size:18px;font-weight:700;margin-bottom:14px;line-height:1.35}
+.q-opts{display:flex;flex-direction:column;gap:8px}
+.q-opt{text-align:left;padding:13px 15px;border-radius:12px;background:var(--board2);border:1px solid var(--line);font-size:15.5px;font-family:'IBM Plex Mono',monospace;transition:background .12s}
+.q-opt:hover{background:var(--board3)}
+.q-opt.correct{background:rgba(127,201,139,.16);border-color:var(--verde);color:var(--verde)}
+.q-opt.wrong{background:rgba(226,105,79,.14);border-color:var(--rojo);color:var(--rojo)}
+.q-meta{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);margin-bottom:12px}
+.q-result{text-align:center;padding:34px 16px;background:var(--board2);border:1px solid var(--line);border-radius:var(--radius)}
+.q-result .score{font-size:44px;font-weight:900;color:var(--saffron);font-family:'IBM Plex Mono',monospace}
+.q-result p{color:var(--muted);font-size:14px;margin-top:6px}
+.q-result .btn{margin-top:18px}
+.vm-controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.vm-grid{background:var(--board2);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.vm-row{display:flex;justify-content:space-between;align-items:center;padding:10px 4px;border-bottom:1px dashed var(--line)}
+.vm-row:last-child{border-bottom:none}
+.vm-pron{font-family:'IBM Plex Mono',monospace;color:var(--muted);font-size:14.5px}
+.vm-cell{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:16px;padding:6px 14px;border-radius:9px;background:var(--board3);border:1px solid var(--line);min-width:130px;text-align:center}
+.vm-cell.hidden-cell{color:transparent;text-shadow:0 0 12px rgba(241,239,230,.55);cursor:pointer}
+.vm-cell.revealed{color:var(--saffron)}
+.section-label{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:22px 0 10px}
+.footer-tip{margin-top:34px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* =========================================================
+   DIECISÉIS v2 — original content mapped to the classic
+   16-lesson intensive sequence. Past tense at lesson 3,
+   pronoun substitution, imperative, comparatives, city
+   navigation. Tile-assembly drills + speech synthesis +
+   persistent per-sentence review scores.
+   ========================================================= */
+
+const PRONOUNS = ["yo","tú","él / ella / usted","nosotros","vosotros","ellos / ustedes"];
+const VERBS = {
+  ser:{pres:["soy","eres","es","somos","sois","son"],pret:["fui","fuiste","fue","fuimos","fuisteis","fueron"]},
+  estar:{pres:["estoy","estás","está","estamos","estáis","están"],pret:["estuve","estuviste","estuvo","estuvimos","estuvisteis","estuvieron"]},
+  tener:{pres:["tengo","tienes","tiene","tenemos","tenéis","tienen"],pret:["tuve","tuviste","tuvo","tuvimos","tuvisteis","tuvieron"]},
+  ir:{pres:["voy","vas","va","vamos","vais","van"],pret:["fui","fuiste","fue","fuimos","fuisteis","fueron"]},
+  dar:{pres:["doy","das","da","damos","dais","dan"],pret:["di","diste","dio","dimos","disteis","dieron"]},
+  hacer:{pres:["hago","haces","hace","hacemos","hacéis","hacen"],pret:["hice","hiciste","hizo","hicimos","hicisteis","hicieron"]},
+  hablar:{pres:["hablo","hablas","habla","hablamos","habláis","hablan"],pret:["hablé","hablaste","habló","hablamos","hablasteis","hablaron"]},
+  comer:{pres:["como","comes","come","comemos","coméis","comen"],pret:["comí","comiste","comió","comimos","comisteis","comieron"]},
+  vivir:{pres:["vivo","vives","vive","vivimos","vivís","viven"],pret:["viví","viviste","vivió","vivimos","vivisteis","vivieron"]},
+  conocer:{pres:["conozco","conoces","conoce","conocemos","conocéis","conocen"],pret:["conocí","conociste","conoció","conocimos","conocisteis","conocieron"]},
+  querer:{pres:["quiero","quieres","quiere","queremos","queréis","quieren"],pret:["quise","quisiste","quiso","quisimos","quisisteis","quisieron"]},
+  poder:{pres:["puedo","puedes","puede","podemos","podéis","pueden"],pret:["pude","pudiste","pudo","pudimos","pudisteis","pudieron"]},
+  pedir:{pres:["pido","pides","pide","pedimos","pedís","piden"],pret:["pedí","pediste","pidió","pedimos","pedisteis","pidieron"]},
+  dormir:{pres:["duermo","duermes","duerme","dormimos","dormís","duermen"],pret:["dormí","dormiste","durmió","dormimos","dormisteis","durmieron"]}
+};
+const TENSE_NAMES = {pres:"Presente",pret:"Pretérito"};
+const DISTRACTORS = ["es","está","son","tiene","muy","no","el","la","los","de","en","que","y","con","mi","su","por","a"];
+
+const LESSONS = [
+{ /* 1 */
+ title:"The -ar engine", sub:"Pronunciation · -ar present · negation · gender & plural",
+ note:"Day one, you already speak. Every regular <b>-ar</b> verb runs on one engine: <b>-o, -as, -a, -amos, -áis, -an</b>. Negation is one word before the verb: <b>no trabajo</b>. Sounds: <b>h</b> is silent, <b>v</b>≈b, <b>j</b> is a hard kh. Nouns in -o are usually masculine, -a feminine; plural adds -s.",
+ tables:[{title:"hablar — presente (the engine)",verbKey:"hablar",tense:"pres"}],
+ vocab:[["hola","hello","привет"],["buenos días","good morning","доброе утро"],["buenas noches","good evening/night","добрый вечер"],["adiós","goodbye","до свидания"],["gracias","thank you","спасибо"],["por favor","please","пожалуйста"],["trabajar","to work","работать"],["hablar","to speak","говорить"],["descansar","to rest","отдыхать"],["estudiar","to study","учиться"]],
+ drills:[
+  {en:"I work.",ru:"Я работаю.",es:"Trabajo."},
+  {en:"We speak Spanish.",ru:"Мы говорим по-испански.",es:"Hablamos español."},
+  {en:"She doesn't study.",ru:"Она не учится.",es:"Ella no estudia."},
+  {en:"They rest a lot.",ru:"Они много отдыхают.",es:"Descansan mucho."},
+  {task:"Make it negative",en:"We work.",ru:"Мы работаем.",es:"No trabajamos."},
+  {en:"Do you speak Spanish?",ru:"Ты говоришь по-испански?",es:"¿Hablas español?"}
+ ],
+ quiz:[
+  {q:"Yo ___ mucho.",opts:["trabajo","trabaja","trabajas","trabajan"],a:0},
+  {q:"«They don't speak» =",opts:["No hablan.","Hablan no.","No habla.","Nos hablan."],a:0},
+  {q:"Nosotros ___ español.",opts:["hablamos","hablan","hablo","habláis"],a:0},
+  {q:"«to rest» =",opts:["descansar","estudiar","trabajar","hablar"],a:0}
+ ]
+},
+{ /* 2 */
+ title:"Ser, estar, questions", sub:"Who you are · where things are · asking anything",
+ note:"Two verbs for <b>to be</b>: <b>ser</b> for what you are (soy capitán, soy de Rusia), <b>estar</b> for where and how you are (estoy en casa). Questions need no helpers — intonation or a question word first: <b>¿Dónde estás?</b>",
+ tables:[{title:"ser — presente",verbKey:"ser",tense:"pres"},{title:"estar — presente",verbKey:"estar",tense:"pres"},{title:"preguntas",rows:[["¿qué?","what?"],["¿quién?","who?"],["¿dónde?","where?"],["¿cómo?","how?"],["¿por qué?","why?"]]}],
+ vocab:[["ser","to be (identity)","быть (кто/какой)"],["estar","to be (state/place)","быть (где/как)"],["capitán","captain","капитан"],["profesor, -a","teacher","преподаватель"],["ciudad","city","город"],["mar","sea","море"],["casa","house, home","дом"],["cerca de","near","рядом с"],["aquí","here","здесь"],["de","from, of","из, от"]],
+ drills:[
+  {en:"I am a captain.",ru:"Я капитан.",es:"Soy capitán."},
+  {en:"Where are you?",ru:"Где ты?",es:"¿Dónde estás?"},
+  {en:"The city is near the sea.",ru:"Город рядом с морем.",es:"La ciudad está cerca del mar."},
+  {en:"Who is she?",ru:"Кто она?",es:"¿Quién es ella?"},
+  {en:"I am from Russia.",ru:"Я из России.",es:"Soy de Rusia."},
+  {task:"Make it a question",en:"You are a teacher.",ru:"Ты преподаватель.",es:"¿Eres profesor?"}
+ ],
+ quiz:[
+  {q:"Yo ___ capitán.",opts:["soy","estoy","es","eres"],a:0},
+  {q:"Nosotros ___ en casa.",opts:["estamos","somos","están","sois"],a:0},
+  {q:"«Where?» =",opts:["¿dónde?","¿cómo?","¿quién?","¿qué?"],a:0},
+  {q:"Ella ___ de España.",opts:["es","está","eres","estás"],a:0}
+ ]
+},
+{ /* 3 */
+ title:"The past — already", sub:"Pretérito for -ar / -er / -ir · family",
+ note:"Lesson three, and you own yesterday. The past algorithm: <b>-ar → -é, -aste, -ó…</b>; <b>-er/-ir → -í, -iste, -ió…</b> The accent carries the stress: hablé, habló. Most real conversation is about what happened — so this comes now, not in month six.",
+ tables:[{title:"hablar — pretérito",verbKey:"hablar",tense:"pret"},{title:"comer — pretérito (-er/-ir)",verbKey:"comer",tense:"pret"}],
+ vocab:[["padre","father","отец"],["madre","mother","мать"],["hermano, -a","brother, sister","брат, сестра"],["hijo, -a","son, daughter","сын, дочь"],["familia","family","семья"],["ayer","yesterday","вчера"],["anoche","last night","вчера вечером"],["visitar","to visit","навещать"],["comer","to eat","есть"],["vivir","to live","жить"]],
+ drills:[
+  {en:"Yesterday I worked.",ru:"Вчера я работал.",es:"Ayer trabajé."},
+  {en:"I spoke with my father.",ru:"Я говорил с отцом.",es:"Hablé con mi padre."},
+  {en:"We visited the family.",ru:"Мы навестили семью.",es:"Visitamos a la familia."},
+  {en:"Last night she ate at home.",ru:"Вчера вечером она поела дома.",es:"Anoche ella comió en casa."},
+  {en:"My brother didn't work yesterday.",ru:"Мой брат вчера не работал.",es:"Mi hermano no trabajó ayer."},
+  {task:"Make it a question",en:"You spoke with your sister.",ru:"Ты говорил с сестрой.",es:"¿Hablaste con tu hermana?"}
+ ],
+ quiz:[
+  {q:"Ayer yo ___ mucho. (trabajar)",opts:["trabajé","trabajo","trabajaste","trabajó"],a:0},
+  {q:"Ella ___ en casa. (comer, past)",opts:["comió","comí","come","comieron"],a:0},
+  {q:"«We lived» =",opts:["vivimos","viven","vivíamos","vivo"],a:0},
+  {q:"«father» =",opts:["padre","hermano","hijo","madre"],a:0}
+ ]
+},
+{ /* 4 */
+ title:"Mine, yours & numbers", sub:"Articles · possessives · counting to 100",
+ note:"Articles: <b>el/la</b>, plural <b>los/las</b>; indefinite <b>un/una</b>. Possession is a tiny set: <b>mi, tu, su, nuestro, vuestro, su</b> — they don't change for gender except nuestro/vuestro. Numbers past 30 join with <b>y</b>: treinta y dos.",
+ tables:[{title:"posesivos",rows:[["mi / mis","my"],["tu / tus","your"],["su / sus","his, her, your (Ud.)"],["nuestro, -a","our"],["vuestro, -a","your (pl.)"],["su / sus","their"]]},{title:"números",rows:[["1–5","uno, dos, tres, cuatro, cinco"],["6–10","seis, siete, ocho, nueve, diez"],["20 / 30 / 40","veinte / treinta / cuarenta"],["50 / 100","cincuenta / cien"],["32","treinta y dos"]]}],
+ vocab:[["mi","my","мой"],["tu","your","твой"],["su","his / her / their","его / её / их"],["nuestro, -a","our","наш"],["libro","book","книга"],["coche","car","машина"],["barco","boat, ship","судно"],["café","coffee","кофе"],["dos","two","два"],["mucho, -a","much, a lot","много"]],
+ drills:[
+  {en:"My house is here.",ru:"Мой дом здесь.",es:"Mi casa está aquí."},
+  {en:"Our boat is in the sea.",ru:"Наше судно в море.",es:"Nuestro barco está en el mar."},
+  {en:"It's my book.",ru:"Это моя книга.",es:"Es mi libro."},
+  {en:"Two coffees, please.",ru:"Два кофе, пожалуйста.",es:"Dos cafés, por favor."},
+  {en:"Her family is from Spain.",ru:"Её семья из Испании.",es:"Su familia es de España."},
+  {en:"Thirty-two.",ru:"Тридцать два.",es:"Treinta y dos."}
+ ],
+ quiz:[
+  {q:"___ casa (our)",opts:["nuestra","nuestro","mis","tus"],a:0},
+  {q:"32 =",opts:["treinta y dos","tres y dos","veinte y doce","treinta dos"],a:0},
+  {q:"«his car» =",opts:["su coche","tu coche","mi coche","sus coche"],a:0},
+  {q:"Plural of «el libro»:",opts:["los libros","las libros","el libros","los libroes"],a:0}
+ ]
+},
+{ /* 5 */
+ title:"The calendar", sub:"Days · months · seasons · dates",
+ note:"Days and months go without capital letters. \"On Monday\" is just <b>el lunes</b>. Dates: <b>el cinco de mayo</b>. Seasons take <b>en</b>: en verano. Now every action you know can be pinned to a time.",
+ tables:[{title:"la semana",rows:[["lunes – domingo","lunes, martes, miércoles, jueves, viernes, sábado, domingo"]]},{title:"los meses",rows:[["1–6","enero, febrero, marzo, abril, mayo, junio"],["7–12","julio, agosto, septiembre, octubre, noviembre, diciembre"]]}],
+ vocab:[["semana","week","неделя"],["mes","month","месяц"],["año","year","год"],["verano","summer","лето"],["invierno","winter","зима"],["primavera","spring","весна"],["otoño","autumn","осень"],["cumpleaños","birthday","день рождения"],["fiesta","party, holiday","праздник"],["hoy","today","сегодня"]],
+ drills:[
+  {en:"Today is Friday.",ru:"Сегодня пятница.",es:"Hoy es viernes."},
+  {en:"My birthday is the fifth of May.",ru:"Мой день рождения — пятого мая.",es:"Mi cumpleaños es el cinco de mayo."},
+  {en:"In summer I rest.",ru:"Летом я отдыхаю.",es:"En verano descanso."},
+  {en:"We worked in January.",ru:"Мы работали в январе.",es:"Trabajamos en enero."},
+  {en:"The party is on Saturday.",ru:"Праздник в субботу.",es:"La fiesta es el sábado."},
+  {en:"What day is today?",ru:"Какой сегодня день?",es:"¿Qué día es hoy?"}
+ ],
+ quiz:[
+  {q:"«on Monday» =",opts:["el lunes","en lunes","a lunes","de lunes"],a:0},
+  {q:"«summer» =",opts:["verano","invierno","otoño","primavera"],a:0},
+  {q:"«the 5th of May» =",opts:["el cinco de mayo","cinco el mayo","el mayo de cinco","en cinco mayo"],a:0},
+  {q:"«month» =",opts:["mes","semana","año","día"],a:0}
+ ]
+},
+{ /* 6 */
+ title:"I see it: lo & la", sub:"Direct object pronouns · conocer · times of day",
+ note:"Stop repeating nouns — that's the difference between reciting and speaking. <b>lo</b> (him/it), <b>la</b> (her/it), <b>los/las</b> (them) go <b>before</b> the verb: <b>lo veo</b>. Knowing people = <b>conocer</b> (yo conozco). Time of day takes <b>por</b>: por la mañana.",
+ tables:[{title:"pronombres directos",rows:[["me","me"],["te","you"],["lo / la","him, her, it"],["nos","us"],["os","you (pl.)"],["los / las","them"]]},{title:"conocer — presente",verbKey:"conocer",tense:"pres"}],
+ vocab:[["conocer","to know (people)","знать (кого-то)"],["ver","to see","видеть"],["comprar","to buy","покупать"],["la mañana","the morning","утро"],["la tarde","the afternoon","день, вечер"],["la noche","the night","ночь"],["película","film","фильм"],["música","music","музыка"],["amigo, -a","friend","друг"],["bien","well","хорошо"]],
+ drills:[
+  {en:"I know him.",ru:"Я его знаю.",es:"Lo conozco."},
+  {en:"I see her in the morning.",ru:"Я вижу её утром.",es:"La veo por la mañana."},
+  {en:"Do you know my friend?",ru:"Ты знаешь моего друга?",es:"¿Conoces a mi amigo?"},
+  {en:"I bought it yesterday. (el libro)",ru:"Я купил его вчера. (el libro — м.р.)",es:"Lo compré ayer."},
+  {en:"We watch it at night. (la película)",ru:"Мы смотрим её вечером. (la película — ж.р.)",es:"La vemos por la noche."},
+  {task:"Make it negative",en:"I see them.",ru:"Я их вижу.",es:"No los veo."}
+ ],
+ quiz:[
+  {q:"«I know her» =",opts:["La conozco.","Lo conozco.","Conozco la.","Le conozco a."],a:0},
+  {q:"Yo ___ a tu hermano. (conocer)",opts:["conozco","conoces","conoce","conocen"],a:0},
+  {q:"«in the morning» =",opts:["por la mañana","en la mañana","a mañana","de mañana"],a:0},
+  {q:"«I bought it (el libro)» =",opts:["Lo compré.","La compré.","Compré lo.","Los compré."],a:0}
+ ]
+},
+{ /* 7 */
+ title:"Me gusta & myself", sub:"Indirect pronouns · me gusta · reflexive verbs",
+ note:"<b>le</b> answers \"to whom\": me, te, le, nos, os, les. The star construction: <b>me gusta</b> — literally \"it pleases me\": me gusta el mar, me gusta<b>n</b> las islas (plural). Actions on yourself take the reflexive row: <b>me levanto</b>, te levantas, se levanta…",
+ tables:[{title:"pronombres indirectos",rows:[["me","to me"],["te","to you"],["le","to him / her / you"],["nos","to us"],["os","to you (pl.)"],["les","to them"]]},{title:"levantarse — presente",rows:[["yo","me levanto"],["tú","te levantas"],["él / ella","se levanta"],["nosotros","nos levantamos"],["vosotros","os levantáis"],["ellos","se levantan"]]}],
+ vocab:[["gustar","to please (like)","нравиться"],["encantar","to delight (love)","очень нравиться"],["llamarse","to be called","зваться"],["levantarse","to get up","вставать"],["sentirse","to feel","чувствовать себя"],["canción","song","песня"],["vida","life","жизнь"],["corazón","heart","сердце"],["temprano","early","рано"],["tarde","late","поздно"]],
+ drills:[
+  {en:"I like the sea.",ru:"Мне нравится море.",es:"Me gusta el mar."},
+  {en:"My name is Iván.",ru:"Меня зовут Иван.",es:"Me llamo Iván."},
+  {en:"I get up early.",ru:"Я встаю рано.",es:"Me levanto temprano."},
+  {en:"I love this song.",ru:"Мне очень нравится эта песня.",es:"Me encanta esta canción."},
+  {en:"Do you like the music?",ru:"Тебе нравится музыка?",es:"¿Te gusta la música?"},
+  {en:"I feel well.",ru:"Я чувствую себя хорошо.",es:"Me siento bien."}
+ ],
+ quiz:[
+  {q:"«I like the islands» =",opts:["Me gustan las islas.","Me gusta las islas.","Gusto las islas.","Me gustas islas."],a:0},
+  {q:"Ella ___ llama Ana.",opts:["se","me","te","le"],a:0},
+  {q:"Nosotros ___ levantamos temprano.",opts:["nos","os","se","me"],a:0},
+  {q:"«to feel» =",opts:["sentirse","llamarse","levantarse","encantar"],a:0}
+ ]
+},
+{ /* 8 */
+ title:"Tener, dar & commands", sub:"Tener idioms · dar · the imperative",
+ note:"<b>Tener</b> = to have — plus Spanish <i>has</i> hunger, thirst and years: tengo hambre, tengo 40 años. <b>Dar</b> = to give (doy, das, da…). Commands (tú): -ar → -a (¡habla!), -er/-ir → -e (¡come!). Four wild ones you'll use daily: <b>di</b> (say), <b>dame</b> (give me), <b>ven</b> (come), <b>haz</b> (do).",
+ tables:[{title:"tener — presente",verbKey:"tener",tense:"pres"},{title:"dar — presente",verbKey:"dar",tense:"pres"},{title:"imperativo (tú)",rows:[["¡habla!","speak!"],["¡come!","eat!"],["¡di! / ¡dime!","say! / tell me!"],["¡dame!","give me!"],["¡ven!","come!"],["¡haz!","do!"]]}],
+ vocab:[["tener","to have","иметь"],["dar","to give","давать"],["hambre","hunger","голод"],["sed","thirst","жажда"],["frío / calor","cold / heat","холод / жара"],["años","years (age)","годы, лет"],["dinero","money","деньги"],["tiempo","time","время"],["venir","to come","приходить"],["agua","water","вода"]],
+ drills:[
+  {en:"I'm hungry.",ru:"Я голоден.",es:"Tengo hambre."},
+  {en:"How old are you?",ru:"Сколько тебе лет?",es:"¿Cuántos años tienes?"},
+  {en:"Give me the book, please.",ru:"Дай мне книгу, пожалуйста.",es:"Dame el libro, por favor."},
+  {en:"Tell me.",ru:"Скажи мне.",es:"Dime."},
+  {en:"Come here!",ru:"Иди сюда!",es:"¡Ven aquí!"},
+  {task:"Make it negative",en:"We have time.",ru:"У нас есть время.",es:"No tenemos tiempo."}
+ ],
+ quiz:[
+  {q:"«I'm thirsty» =",opts:["Tengo sed.","Soy sed.","Estoy sed.","Hago sed."],a:0},
+  {q:"Ella me ___ el libro. (dar)",opts:["da","doy","dan","das"],a:0},
+  {q:"«Give me!» =",opts:["¡Dame!","¡Doy!","¡Dar!","¡Den!"],a:0},
+  {q:"Command «eat!» (tú) =",opts:["¡come!","¡comes!","¡comer!","¡coma tú!"],a:0}
+ ]
+},
+{ /* 9 */
+ title:"More or less", sub:"Comparatives · mejor/peor · exclamations",
+ note:"Compare with one frame: <b>más … que</b> (more than), <b>menos … que</b> (less than), <b>tan … como</b> (as … as). Two irregulars: <b>mejor</b> (better), <b>peor</b> (worse). Evaluate anything instantly: <b>¡Qué bonito!</b>",
+ tables:[{title:"comparación",rows:[["más grande que","bigger than"],["menos caro que","less expensive than"],["tan bueno como","as good as"],["mejor / peor","better / worse"],["¡qué + adj!","how …! (¡qué bonito!)"]]}],
+ vocab:[["grande","big","большой"],["pequeño, -a","small","маленький"],["alto, -a","tall, high","высокий"],["bueno, -a","good","хороший"],["malo, -a","bad","плохой"],["mejor","better","лучше"],["peor","worse","хуже"],["bonito, -a","pretty","красивый"],["caro, -a","expensive","дорогой"],["barato, -a","cheap","дешёвый"]],
+ drills:[
+  {en:"My boat is bigger than his car.",ru:"Моё судно больше его машины.",es:"Mi barco es más grande que su coche."},
+  {en:"The coffee is better here.",ru:"Кофе здесь лучше.",es:"El café es mejor aquí."},
+  {en:"How pretty!",ru:"Как красиво!",es:"¡Qué bonito!"},
+  {en:"The hotel is more expensive than the house.",ru:"Отель дороже дома.",es:"El hotel es más caro que la casa."},
+  {en:"She is taller than me.",ru:"Она выше меня.",es:"Ella es más alta que yo."},
+  {en:"The house is as big as the hotel.",ru:"Дом такой же большой, как отель.",es:"La casa es tan grande como el hotel."}
+ ],
+ quiz:[
+  {q:"«better» =",opts:["mejor","más bueno","peor","muy bien"],a:0},
+  {q:"El mar es ___ grande ___ la ciudad.",opts:["más … que","tan … que","más … como","muy … que"],a:0},
+  {q:"«How expensive!» =",opts:["¡Qué caro!","¡Cómo caro!","¡Muy caro qué!","¡Caro qué!"],a:0},
+  {q:"«as good as» =",opts:["tan bueno como","más bueno como","tan bueno que","bueno tan como"],a:0}
+ ]
+},
+{ /* 10 */
+ title:"Something, nothing, travel", sub:"algo / nada / alguien / nadie · ver vs mirar · ir",
+ note:"The universal pronouns: <b>algo</b> (something), <b>nada</b> (nothing), <b>alguien</b> (someone), <b>nadie</b> (no one), <b>todo</b> (everything). Double negative is correct: <b>no veo nada</b>. Sense pairs: <b>ver</b> = to see, <b>mirar</b> = to look; <b>oír</b> = to hear, <b>escuchar</b> = to listen. And <b>ir a + verb</b> = the instant future.",
+ tables:[{title:"ir — presente",verbKey:"ir",tense:"pres"},{title:"indefinidos",rows:[["algo / nada","something / nothing"],["alguien / nadie","someone / no one"],["todo","everything"],["hay","there is / are"]]}],
+ vocab:[["ir","to go","идти, ехать"],["viajar","to travel","путешествовать"],["viaje","trip","поездка"],["hotel","hotel","отель"],["playa","beach","пляж"],["montaña","mountain","гора"],["avión","plane","самолёт"],["tren","train","поезд"],["mañana","tomorrow","завтра"],["hay","there is / are","есть, имеется"]],
+ drills:[
+  {en:"I don't see anything.",ru:"Я ничего не вижу.",es:"No veo nada."},
+  {en:"Is anyone here?",ru:"Здесь кто-нибудь есть?",es:"¿Hay alguien aquí?"},
+  {en:"Tomorrow I'm going to travel.",ru:"Завтра я поеду.",es:"Mañana voy a viajar."},
+  {en:"We are going to the beach.",ru:"Мы идём на пляж.",es:"Vamos a la playa."},
+  {en:"I hear the music, but I'm not listening to it.",ru:"Я слышу музыку, но не слушаю её.",es:"Oigo la música, pero no la escucho."},
+  {en:"Do you want something? — No, nothing, thanks.",ru:"Хочешь что-нибудь? — Нет, ничего, спасибо.",es:"¿Quieres algo? — No, nada, gracias."}
+ ],
+ quiz:[
+  {q:"«I don't see anything» =",opts:["No veo nada.","No veo algo.","Veo nada.","Nada no veo."],a:0},
+  {q:"«no one» =",opts:["nadie","alguien","nada","todo"],a:0},
+  {q:"Nosotros ___ a viajar mañana.",opts:["vamos","voy","van","vais"],a:0},
+  {q:"«to listen» =",opts:["escuchar","oír","mirar","ver"],a:0}
+ ]
+},
+{ /* 11 */
+ title:"Colors & portraits", sub:"Color palette · describing people · comparisons in action",
+ note:"Colors behave like adjectives: <b>el mar azul</b>, <b>la casa blanca</b>. Describe people with <b>tener</b>: tiene el pelo negro, tiene los ojos verdes. Now comparisons get personal: más joven que…",
+ tables:[{title:"colores",rows:[["blanco / negro","white / black"],["rojo / azul","red / blue"],["verde / amarillo","green / yellow"],["el vino tinto","red wine (special word)"]]}],
+ vocab:[["blanco, -a","white","белый"],["negro, -a","black","чёрный"],["rojo, -a","red","красный"],["azul","blue","синий"],["verde","green","зелёный"],["pelo","hair","волосы"],["ojos","eyes","глаза"],["joven","young","молодой"],["viejo, -a","old","старый"],["vino","wine","вино"]],
+ drills:[
+  {en:"The sea is blue.",ru:"Море синее.",es:"El mar es azul."},
+  {en:"She has black hair.",ru:"У неё чёрные волосы.",es:"Ella tiene el pelo negro."},
+  {en:"His eyes are green.",ru:"У него зелёные глаза.",es:"Sus ojos son verdes."},
+  {en:"A red wine, please.",ru:"Красное вино, пожалуйста.",es:"Un vino tinto, por favor."},
+  {en:"He is younger than my brother.",ru:"Он моложе моего брата.",es:"Es más joven que mi hermano."},
+  {en:"The white house is old.",ru:"Белый дом старый.",es:"La casa blanca es vieja."}
+ ],
+ quiz:[
+  {q:"«red wine» =",opts:["vino tinto","vino rojo","tinto vino","vino negro"],a:0},
+  {q:"«She has green eyes» =",opts:["Tiene los ojos verdes.","Es los ojos verdes.","Tiene ojos verde.","Está ojos verdes."],a:0},
+  {q:"la casa ___",opts:["blanca","blanco","blancos","blanc"],a:0},
+  {q:"«young» =",opts:["joven","viejo","alto","negro"],a:0}
+ ]
+},
+{ /* 12 */
+ title:"Joker words & clothes", sub:"Parameter words · ponerse / quitarse · wardrobe",
+ note:"When the exact word is missing, joker words carry you: <b>cosa</b> (thing), <b>sitio</b> (place), <b>gente</b> (people — singular!), <b>forma</b> (way). Clothes ride on reflexives: <b>me pongo</b> (I put on), <b>me quito</b> (I take off), <b>llevo</b> (I wear).",
+ tables:[{title:"comodines",rows:[["cosa","thing"],["sitio","place"],["gente (es)","people (takes singular verb)"],["forma","way, manner"]]}],
+ vocab:[["cosa","thing","вещь"],["sitio","place","место"],["gente","people","люди"],["ropa","clothes","одежда"],["camisa","shirt","рубашка"],["zapatos","shoes","обувь"],["chaqueta","jacket","куртка"],["ponerse","to put on","надевать"],["quitarse","to take off","снимать"],["llevar","to wear","носить"]],
+ drills:[
+  {en:"I have a lot of things.",ru:"У меня много вещей.",es:"Tengo muchas cosas."},
+  {en:"It's a good place.",ru:"Это хорошее место.",es:"Es un buen sitio."},
+  {en:"I put on the jacket.",ru:"Я надеваю куртку.",es:"Me pongo la chaqueta."},
+  {en:"Take off your shoes, please.",ru:"Сними обувь, пожалуйста.",es:"Quítate los zapatos, por favor."},
+  {en:"The people here are good.",ru:"Люди здесь хорошие.",es:"La gente aquí es buena."},
+  {en:"She wears a white shirt.",ru:"Она носит белую рубашку.",es:"Lleva una camisa blanca."}
+ ],
+ quiz:[
+  {q:"«people» takes:",opts:["singular verb (la gente es)","plural verb (la gente son)","no verb","only ser"],a:0},
+  {q:"«I put on» =",opts:["me pongo","me quito","llevo","pongo me"],a:0},
+  {q:"«thing» =",opts:["cosa","sitio","forma","ropa"],a:0},
+  {q:"«Take off (tú) the jacket» =",opts:["Quítate la chaqueta.","Te quita la chaqueta.","Quitas la chaqueta.","Ponte la chaqueta."],a:0}
+ ]
+},
+{ /* 13 */
+ title:"Synthesis: la mesa", sub:"Review in action · restaurant & tourist situations",
+ note:"No new theory — deployment. Everything so far runs the restaurant: past tense, pronouns, gustar, imperative. Key politeness: <b>quisiera</b> = I would like. This lesson drills exchanges, not lines: read both turns, speak both aloud.",
+ tables:[{title:"querer / poder — presente",rows:[["quiero / quieres / quiere","I / you / (s)he want(s)"],["queremos / queréis / quieren","we / you / they want"],["puedo / puedes / puede","I / you / (s)he can"],["quisiera…","I would like… (polite)"]]}],
+ vocab:[["camarero, -a","waiter","официант"],["mesa","table","стол"],["menú","menu","меню"],["cuenta","bill","счёт"],["cerveza","beer","пиво"],["pagar","to pay","платить"],["querer","to want","хотеть"],["poder","can","мочь"],["quisiera","I would like","я бы хотел"],["para","for","для"]],
+ drills:[
+  {dlg:true,en:"— A table for two, please.\n— Yes, this way.",ru:"— Столик на двоих, пожалуйста.\n— Да, сюда, пожалуйста.",es:"— Una mesa para dos, por favor.\n— Sí, por aquí."},
+  {en:"I would like water and wine, please.",ru:"Я бы хотел воду и вино, пожалуйста.",es:"Quisiera agua y vino, por favor."},
+  {dlg:true,en:"— Can I pay?\n— Of course. The bill, please.",ru:"— Могу я заплатить?\n— Конечно. Счёт, пожалуйста.",es:"— ¿Puedo pagar?\n— Claro. La cuenta, por favor."},
+  {en:"Yesterday we ate in a restaurant.",ru:"Вчера мы поели в ресторане.",es:"Ayer comimos en un restaurante."},
+  {en:"I like the menu.",ru:"Мне нравится меню.",es:"Me gusta el menú."},
+  {en:"What do you want to eat?",ru:"Что ты хочешь есть?",es:"¿Qué quieres comer?"}
+ ],
+ quiz:[
+  {q:"«I would like» (polite) =",opts:["quisiera","quiero","querías","quise"],a:0},
+  {q:"«the bill» =",opts:["la cuenta","el menú","la mesa","la cerveza"],a:0},
+  {q:"¿___ pagar? (can I)",opts:["Puedo","Puede","Podemos","Pude"],a:0},
+  {q:"«a table for two» =",opts:["una mesa para dos","una mesa de dos","dos mesa para","una mesa por dos"],a:0}
+ ]
+},
+{ /* 14 */
+ title:"The music of roots", sub:"Stem changes: e→ie, o→ue, e→i — as one system",
+ note:"Not chaos — euphony. Under stress, some roots sing: <b>e→ie</b> (quiero, entiendo, empieza), <b>o→ue</b> (puedo, duermo, vuelve), <b>e→i</b> (pido). The nosotros/vosotros forms escape the stress, so the root stays plain: queremos, dormimos, pedimos. Hear the pattern once and hundreds of verbs open up.",
+ tables:[{title:"querer — e→ie",verbKey:"querer",tense:"pres"},{title:"poder — o→ue",verbKey:"poder",tense:"pres"},{title:"pedir — e→i",verbKey:"pedir",tense:"pres"}],
+ vocab:[["entender","to understand","понимать"],["empezar","to start","начинать"],["pensar","to think","думать"],["dormir","to sleep","спать"],["volver","to return","возвращаться"],["encontrar","to find","находить"],["pedir","to ask for, order","просить, заказывать"],["jugar","to play","играть"],["ahora","now","сейчас"],["más tarde","later","позже"]],
+ drills:[
+  {en:"I don't understand.",ru:"Я не понимаю.",es:"No entiendo."},
+  {en:"We can't sleep.",ru:"Мы не можем спать.",es:"No podemos dormir."},
+  {en:"The film starts now.",ru:"Фильм начинается сейчас.",es:"La película empieza ahora."},
+  {en:"I'll order the wine.",ru:"Я закажу вино.",es:"Pido el vino."},
+  {en:"She returns later.",ru:"Она вернётся позже.",es:"Vuelve más tarde."},
+  {en:"What do you think?",ru:"Что ты думаешь?",es:"¿Qué piensas?"}
+ ],
+ quiz:[
+  {q:"Yo ___ un buen sitio. (encontrar)",opts:["encuentro","encontro","enciento","encontramos"],a:0},
+  {q:"Nosotros ___ dormir. (poder)",opts:["podemos","puedemos","pudemos","podamos"],a:0},
+  {q:"La película ___ ahora. (empezar)",opts:["empieza","empeza","empiezamos","empezó"],a:0},
+  {q:"«I order/ask for» =",opts:["pido","pedo","pide","pedí"],a:0}
+ ]
+},
+{ /* 15 */
+ title:"The map", sub:"Directions · city · transport",
+ note:"Navigation is four words deep: <b>a la derecha</b> (right), <b>a la izquierda</b> (left), <b>todo recto</b> (straight on), <b>¿dónde está…?</b> Transport rides on <b>en</b>: voy en metro, en autobús, en tren.",
+ tables:[{title:"direcciones",rows:[["a la derecha","to the right"],["a la izquierda","to the left"],["todo recto","straight on"],["¿dónde está…?","where is…?"],["en metro / en tren","by metro / by train"]]}],
+ vocab:[["calle","street","улица"],["plaza","square","площадь"],["derecha","right","право"],["izquierda","left","лево"],["recto","straight","прямо"],["lejos","far","далеко"],["cerca","near","близко"],["autobús","bus","автобус"],["metro","metro","метро"],["estación","station","станция"]],
+ drills:[
+  {en:"Where is the station?",ru:"Где станция?",es:"¿Dónde está la estación?"},
+  {en:"Straight on and then to the right.",ru:"Прямо, а потом направо.",es:"Todo recto y después a la derecha."},
+  {dlg:true,en:"— Is it far?\n— No, it's near.",ru:"— Это далеко?\n— Нет, близко.",es:"— ¿Está lejos?\n— No, está cerca."},
+  {en:"I go by metro.",ru:"Я еду на метро.",es:"Voy en metro."},
+  {en:"The square is to the left.",ru:"Площадь налево.",es:"La plaza está a la izquierda."},
+  {en:"How do I get to the beach?",ru:"Как мне попасть на пляж?",es:"¿Cómo voy a la playa?"}
+ ],
+ quiz:[
+  {q:"«to the right» =",opts:["a la derecha","a la izquierda","todo recto","en derecha"],a:0},
+  {q:"«by train» =",opts:["en tren","a tren","por tren","de tren"],a:0},
+  {q:"«Where is the square?» =",opts:["¿Dónde está la plaza?","¿Dónde es la plaza?","¿Adónde la plaza?","¿Qué está la plaza?"],a:0},
+  {q:"«far» =",opts:["lejos","cerca","recto","aquí"],a:0}
+ ]
+},
+{ /* 16 */
+ title:"Final synthesis", sub:"Free conversation · everything at once",
+ note:"Nothing new — everything together. The frames that hold a real conversation: <b>mucho gusto</b>, <b>¿cómo estás?</b>, <b>claro</b>, <b>quizás</b>, <b>hasta luego</b>. Speak both sides of every dialogue. Then close the app and go talk to someone.",
+ tables:[{title:"marcos de conversación",rows:[["mucho gusto","nice to meet you"],["de nada","you're welcome"],["lo siento","I'm sorry"],["claro","of course"],["quizás","maybe"],["hasta luego","see you later"]]}],
+ vocab:[["mucho gusto","nice to meet you","очень приятно"],["de nada","you're welcome","не за что"],["lo siento","I'm sorry","мне жаль"],["claro","of course","конечно"],["quizás","maybe","может быть"],["entonces","then, so","тогда"],["todavía","still, yet","ещё, всё ещё"],["ya","already","уже"],["porque","because","потому что"],["aprender","to learn","учить(ся)"]],
+ drills:[
+  {en:"Nice to meet you. My name is Iván.",ru:"Очень приятно. Меня зовут Иван.",es:"Mucho gusto. Me llamo Iván."},
+  {dlg:true,en:"— How are you?\n— Fine, thanks. And you?",ru:"— Как дела?\n— Хорошо, спасибо. А у тебя?",es:"— ¿Cómo estás?\n— Bien, gracias. ¿Y tú?"},
+  {en:"I learned a lot because I worked every day.",ru:"Я многому научился, потому что занимался каждый день.",es:"Aprendí mucho porque trabajé cada día."},
+  {task:"Make it negative",en:"I understand everything.",ru:"Я всё понимаю.",es:"No entiendo nada."},
+  {en:"Now I can speak Spanish.",ru:"Теперь я могу говорить по-испански.",es:"Ahora puedo hablar español."},
+  {dlg:true,en:"— See you later!\n— Yes, see you tomorrow.",ru:"— До скорого!\n— Да, до завтра.",es:"— ¡Hasta luego!\n— Sí, hasta mañana."}
+ ],
+ quiz:[
+  {q:"«nice to meet you» =",opts:["mucho gusto","de nada","lo siento","hasta luego"],a:0},
+  {q:"«maybe» =",opts:["quizás","claro","entonces","todavía"],a:0},
+  {q:"«already» =",opts:["ya","todavía","ahora","entonces"],a:0},
+  {q:"«I learned» =",opts:["aprendí","aprendo","aprendía","aprendemos"],a:0}
+ ]
+}
+];
+
+const FORMS_SCENARIOS = [
+  // PRETERITE (1) — "I ate" — one dated action, ayer/anoche/la semana pasada triggers
+  { tense: "pret", english: "Yesterday I ate a lot.", ru: "Вчера я много ел.", verb: "comer", answer: "comí", pronoun: "yo", trigger: "ayer" },
+  { tense: "pret", english: "Last night she spoke with her brother.", ru: "Вчера вечером она говорила с братом.", verb: "hablar", answer: "habló", pronoun: "ella", trigger: "anoche" },
+  { tense: "pret", english: "Last week they visited the family.", ru: "На прошлой неделе они навестили семью.", verb: "visitar", answer: "visitaron", pronoun: "ellos", trigger: "la semana pasada" },
+  { tense: "pret", english: "I worked yesterday.", ru: "Я работал вчера.", verb: "trabajar", answer: "trabajé", pronoun: "yo", trigger: "ayer" },
+  { tense: "pret", english: "They didn't study last week.", ru: "Они не учились на прошлой неделе.", verb: "estudiar", answer: "estudiaron", pronoun: "ellos", trigger: "la semana pasada" },
+
+  // IMPERFECT (2) — "I used to eat" — habits, routines, siempre/todos los días/cuando era niño triggers
+  { tense: "imp", english: "When I was a kid, I used to play football.", ru: "Когда я был ребёнком, я играл в футбол.", verb: "jugar", answer: "jugaba", pronoun: "yo", trigger: "cuando era niño" },
+  { tense: "imp", english: "Every day she studied Spanish.", ru: "Каждый день она учила испанский.", verb: "estudiar", answer: "estudiaba", pronoun: "ella", trigger: "todos los días" },
+  { tense: "imp", english: "They always worked together.", ru: "Они всегда работали вместе.", verb: "trabajar", answer: "trabajaban", pronoun: "ellos", trigger: "siempre" },
+  { tense: "imp", english: "While I was eating, he arrived.", ru: "Пока я ел, он пришёл.", verb: "comer", answer: "comía", pronoun: "yo", trigger: "mientras" },
+  { tense: "imp", english: "I used to live in Madrid.", ru: "Я жил в Мадриде.", verb: "vivir", answer: "vivía", pronoun: "yo", trigger: "siempre" },
+
+  // PRESENT PERFECT (3) — "I have eaten" — today/this week/hoy/ya/todavía no triggers
+  { tense: "perf", english: "I have eaten today.", ru: "Я сегодня поел.", verb: "comer", answer: "comido", pronoun: "yo", trigger: "hoy" },
+  { tense: "perf", english: "Have you been to Spain?", ru: "Ты был в Испании?", verb: "estar", answer: "estado", pronoun: "tú", trigger: "ever" },
+  { tense: "perf", english: "I have already spoken with him.", ru: "Я уже говорил с ним.", verb: "hablar", answer: "hablado", pronoun: "yo", trigger: "ya" },
+  { tense: "perf", english: "She hasn't studied this week.", ru: "Она не училась на этой неделе.", verb: "estudiar", answer: "estudiado", pronoun: "ella", trigger: "todavía no" },
+  { tense: "perf", english: "We have worked hard.", ru: "Мы много работали.", verb: "trabajar", answer: "trabajado", pronoun: "nosotros", trigger: "recently" },
+
+  // INFORMAL FUTURE (4) — "I'm going to eat" — plans, mañana/hoy triggers, ir a + infinitive
+  { tense: "ifut", english: "I'm going to study tonight.", ru: "Я буду учиться сегодня вечером.", verb: "estudiar", answer: "voy a estudiar", pronoun: "yo", trigger: "esta noche" },
+  { tense: "ifut", english: "Are you going to work tomorrow?", ru: "Ты завтра будешь работать?", verb: "trabajar", answer: "vas a trabajar", pronoun: "tú", trigger: "mañana" },
+  { tense: "ifut", english: "She's going to visit the museum.", ru: "Она посетит музей.", verb: "visitar", answer: "va a visitar", pronoun: "ella", trigger: "plan" },
+  { tense: "ifut", english: "We are going to eat lunch soon.", ru: "Мы вскоре будем обедать.", verb: "comer", answer: "vamos a comer", pronoun: "nosotros", trigger: "pronto" },
+  { tense: "ifut", english: "They're going to travel this summer.", ru: "Они будут путешествовать этим летом.", verb: "viajar", answer: "van a viajar", pronoun: "ellos", trigger: "verano" },
+
+  // SIMPLE FUTURE (5) — "I will eat" — promises, predictions, mañana/la próxima semana
+  { tense: "sfut", english: "I will call you tomorrow.", ru: "Я позвоню тебе завтра.", verb: "llamar", answer: "llamaré", pronoun: "yo", trigger: "mañana" },
+  { tense: "sfut", english: "It will rain on Friday.", ru: "В пятницу будет дождь.", verb: "llover", answer: "lloverá", pronoun: "it", trigger: "el viernes" },
+  { tense: "sfut", english: "You will succeed.", ru: "Ты добьёшься успеха.", verb: "triunfar", answer: "triunfarás", pronoun: "tú", trigger: "promise" },
+  { tense: "sfut", english: "We will meet next week.", ru: "Мы встретимся на следующей неделе.", verb: "encontrar", answer: "nos encontraremos", pronoun: "nosotros", trigger: "la próxima semana" },
+  { tense: "sfut", english: "They will arrive soon.", ru: "Они скоро приедут.", verb: "llegar", answer: "llegarán", pronoun: "ellos", trigger: "pronto" },
+
+  // CONDITIONAL (6) — "I would eat" — hypotheticals, polite requests
+  { tense: "cond", english: "I would like coffee.", ru: "Я бы хотел кофе.", verb: "querer", answer: "querría", pronoun: "yo", trigger: "polite" },
+  { tense: "cond", english: "Would you help me?", ru: "Ты бы мне помог?", verb: "ayudar", answer: "ayudarías", pronoun: "tú", trigger: "polite" },
+  { tense: "cond", english: "If I had money, I would travel.", ru: "Если бы у меня были деньги, я путешествовал бы.", verb: "viajar", answer: "viajaría", pronoun: "yo", trigger: "hypothetical" },
+  { tense: "cond", english: "She would study more if she had time.", ru: "Она бы больше училась, если бы у неё было время.", verb: "estudiar", answer: "estudiaría", pronoun: "ella", trigger: "hypothetical" },
+
+  // PLUPERFECT (7) — "I had eaten" — past-before-the-past
+  { tense: "plup", english: "I had eaten before arriving.", ru: "Я поел перед приходом.", verb: "comer", answer: "había comido", pronoun: "yo", trigger: "before" },
+  { tense: "plup", english: "She had studied the lesson.", ru: "Она изучила урок.", verb: "estudiar", answer: "había estudiado", pronoun: "ella", trigger: "before" },
+  { tense: "plup", english: "They had worked hard.", ru: "Они много работали.", verb: "trabajar", answer: "habían trabajado", pronoun: "ellos", trigger: "before" }
+];
+
+/* ---------- state & storage ---------- */
+let progress = {};       // {i:{drills:true, quizBest:n}}
+let scores = {};         // {"lesson:index": int}  low = weak
+let ruHints = true, tiles = true;
+let formsScores = {};    // {"scenario-id": score}  for 7-forms trainer
+let formsHideSecondary = false;  // toggle to hide tense secondary forms in 7-forms display
+const FORM_TENSES = {      // metadata for each tense form
+  pret: { name: "Preterite", en: "I ate", es: "Pretérito" },
+  imp: { name: "Imperfect", en: "I used to eat", es: "Pretérito Imperfecto" },
+  perf: { name: "Present Perfect", en: "I have eaten", es: "Pretérito Perfecto" },
+  ifut: { name: "Informal Future", en: "I'm going to eat", es: "Ir a + infinitivo" },
+  sfut: { name: "Simple Future", en: "I will eat", es: "Futuro Simple" },
+  cond: { name: "Conditional", en: "I would eat", es: "Condicional" },
+  plup: { name: "Pluperfect", en: "I had eaten", es: "Pretérito Pluscuamperfecto" }
+};
+const PKEY = "dieciseis:v2";
+
+/* Persistence: window.storage inside Claude artifacts, localStorage when
+   deployed as a normal website (Vercel/GitHub Pages), memory-only as last resort. */
+const hasClaudeStorage = typeof window!=="undefined" && window.storage && typeof window.storage.get==="function";
+async function loadState(){
+  let raw=null;
+  try{
+    if(hasClaudeStorage){ const r=await window.storage.get(PKEY); raw=r&&r.value; }
+    else{ raw=localStorage.getItem(PKEY); }
+  }catch(e){/* first run or storage unavailable */}
+  if(raw){
+    try{ const d=JSON.parse(raw);
+      progress=d.progress||{}; scores=d.scores||{}; ruHints=d.ruHints!==false; tiles=d.tiles!==false;
+      formsScores = d.formsScores || {}; formsHideSecondary = d.formsHideSecondary === true;
+    }catch(e){}
+  }
+}
+async function saveState(){
+  const raw=JSON.stringify({progress,scores,ruHints,tiles,formsScores,formsHideSecondary});
+  try{
+    if(hasClaudeStorage){ await window.storage.set(PKEY,raw); }
+    else{ localStorage.setItem(PKEY,raw); }
+  }catch(e){console.error("save failed",e);}
+}
+
+/* ---------- speech ---------- */
+let esVoice = null;
+function pickVoice(){
+  const vs = speechSynthesis.getVoices();
+  esVoice = vs.find(v=>v.lang==="es-ES") || vs.find(v=>v.lang && v.lang.startsWith("es")) || null;
+}
+if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(text){
+  if(!('speechSynthesis' in window)) return;
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text.replace(/—/g,","));
+    u.lang="es-ES"; if(esVoice) u.voice=esVoice; u.rate=0.92;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ---------- helpers ---------- */
+const app=document.getElementById("app");
+function h(html){app.innerHTML=html;window.scrollTo(0,0);}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function lessonDone(i){const p=progress[i];return p&&p.drills&&(p.quizBest>=Math.ceil(LESSONS[i].quiz.length*0.75));}
+function countDone(){let n=0;for(let i=0;i<16;i++)if(lessonDone(i))n++;return n;}
+function scoreKey(li,di){return li+":"+di;}
+function bumpScore(li,di,delta){
+  const k=scoreKey(li,di);
+  scores[k]=Math.max(-3,Math.min(5,(scores[k]||0)+delta));
+}
+
+function topbar(){
+  return `<div class="topbar">
+    <div class="brand" onclick="goHome()"><h1>DIECISÉIS</h1><span>v2 · español</span></div>
+    <div class="top-actions">
+      <button class="chip ${tiles?'on':''}" onclick="toggleTiles()">Tiles</button>
+      <button class="chip ${ruHints?'on':''}" onclick="toggleRu()">RU</button>
+    </div>
+  </div>`;
+}
+function toggleRu(){ruHints=!ruHints;saveState();rerender();}
+function toggleTiles(){tiles=!tiles;saveState();rerender();}
+let rerender=renderHome;
+
+/* ---------- home ---------- */
+function renderHome(){
+  rerender=renderHome;
+  const done=countDone(), pct=Math.round(done/16*100);
+  let cells="";
+  for(let i=0;i<16;i++){
+    const L=LESSONS[i];
+    cells+=`<button class="cell" onclick="openLesson(${i})">
+      ${lessonDone(i)?'<span class="done-mark">✓</span>':''}
+      <span class="num">${String(i+1).padStart(2,"0")}</span>
+      <span class="t">${L.title}</span>
+      <span class="s">${L.sub.split("·")[0].trim()}</span>
+    </button>`;
+  }
+  h(`${topbar()}
+  <div class="hero">
+    <h2>Past tense by <em>lesson three.</em><br>Speaking from hour one.</h2>
+    <p>Original content on the classic 16-lesson intensive frame: verb algorithms first, pronoun
+    substitution, commands, comparisons, navigation. Build each sentence from tiles — or say it
+    aloud and reveal. Every answer speaks. Weak sentences come back in Mixed review.</p>
+    <div class="progress-line">${done} / 16 lessons completed</div>
+    <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+  </div>
+  <div class="grid16">${cells}</div>
+  <div class="tools-row">
+    <button class="tool-btn" onclick="renderVM()">
+      <div class="tt">⚙ Verb machine</div>
+      <div class="ts">14 key verbs, presente & pretérito — drill the tables blind</div>
+    </button>
+    <button class="tool-btn" onclick="renderReview()">
+      <div class="tt">↻ Mixed review</div>
+      <div class="ts">Your weakest sentences from all opened lessons, resurfaced</div>
+    </button>
+    <button class="tool-btn" onclick="renderFormsTrainer()">
+      <div class="tt">⏱ 7-Forms Trainer</div>
+      <div class="ts">Master past & future tense decision tree</div>
+    </button>
+  </div>
+  <div class="footer-tip">A lesson is complete after its drill deck plus 75%+ on the check. Tap any vocabulary word to hear it. Progress and per-sentence scores are saved on this device.</div>`);
+}
+function goHome(){renderHome();}
+
+/* ---------- lesson ---------- */
+let curLesson=0,curTab="learn";
+function openLesson(i){curLesson=i;curTab="learn";renderLesson();}
+function setTab(t){curTab=t;if(t==="drill")startDrill(lessonDeck(curLesson),"lesson");else if(t==="quiz")startQuiz();else renderLesson();}
+function lessonDeck(i){return LESSONS[i].drills.map((d,di)=>({...d,_l:i,_d:di}));}
+
+function matrixHTML(t){
+  if(t.rows){return `<div class="matrix"><h4>${t.title}</h4><table>${t.rows.map(r=>`<tr><td class="pron">${r[0]}</td><td class="form">${r[1]}</td></tr>`).join("")}</table></div>`;}
+  const f=VERBS[t.verbKey][t.tense];
+  return `<div class="matrix"><h4>${t.title}</h4><table>${PRONOUNS.map((p,i)=>`<tr><td class="pron">${p}</td><td class="form">${f[i]}</td></tr>`).join("")}</table></div>`;
+}
+function renderLesson(){
+  rerender=renderLesson;
+  const L=LESSONS[curLesson];
+  const vocab=L.vocab.map(v=>`<div class="vword" onclick="speak('${v[0].replace(/'/g,"\\'")}')"><span class="es">${v[0]}</span><span class="tr">${v[1]}${ruHints?" · "+v[2]:""}</span></div>`).join("");
+  h(`${topbar()}
+  <div class="crumb"><button onclick="goHome()">← All lessons</button><span>Lesson ${curLesson+1} of 16</span></div>
+  <div class="lesson-head"><h2>${L.title}</h2><div class="sub">${L.sub}</div></div>
+  <div class="tabs">
+    <button class="tab on">Learn</button>
+    <button class="tab" onclick="setTab('drill')">Drill</button>
+    <button class="tab" onclick="setTab('quiz')">Check</button>
+  </div>
+  <div class="note">${L.note}</div>
+  ${L.tables.map(matrixHTML).join("")}
+  <div class="section-label">Vocabulario · tap to hear</div>
+  <div class="vocab-list">${vocab}</div>
+  <div class="drill-actions"><button class="btn primary" onclick="setTab('drill')">Start the drill →</button></div>`);
+}
+
+/* ---------- drill engine ---------- */
+let deck=[],deckIdx=0,deckMode="lesson",revealed=false,deckTotal=0;
+let tileState=null; // {answer:[], bank:[], solved:bool, wrong:bool}
+
+function startDrill(items,mode){
+  deck=[...items];
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+  deckIdx=0;deckMode=mode;revealed=false;deckTotal=deck.length;tileState=null;
+  renderDrill();
+}
+function drillHeader(){
+  const L=LESSONS[curLesson];
+  return deckMode==="lesson"
+   ? `<div class="crumb"><button onclick="goHome()">← All lessons</button><span>Lesson ${curLesson+1} of 16</span></div>
+      <div class="lesson-head"><h2>${L.title}</h2><div class="sub">${L.sub}</div></div>
+      <div class="tabs"><button class="tab" onclick="setTab('learn')">Learn</button><button class="tab on">Drill</button><button class="tab" onclick="setTab('quiz')">Check</button></div>`
+   : `<div class="crumb"><button onclick="goHome()">← Home</button><span>Mixed review</span></div>`;
+}
+function tokenize(es){
+  return es.replace(/[¿?¡!.,—:;]/g," ").split(/\s+/).filter(w=>w.length);
+}
+function initTiles(c){
+  const words=tokenize(c.es);
+  const inSet=new Set(words.map(w=>w.toLowerCase()));
+  const pool=DISTRACTORS.filter(d=>!inSet.has(d));
+  const extra=[];
+  while(extra.length<2&&pool.length){extra.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);}
+  const bank=[...words,...extra].map((w,id)=>({w,id}));
+  for(let i=bank.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[bank[i],bank[j]]=[bank[j],bank[i]];}
+  tileState={target:words,answer:[],bank,solved:false,wrong:false};
+}
+function renderDrill(){
+  rerender=renderDrill;
+  if(deckIdx>=deck.length){
+    if(deckMode==="lesson"){progress[curLesson]=progress[curLesson]||{};progress[curLesson].drills=true;saveState();}
+    h(`${topbar()}${drillHeader()}
+    <div class="drill-done"><h3>¡Muy bien!</h3><p>${deckTotal} sentences drilled.</p>
+    <div class="drill-actions">
+      <button class="btn" onclick="${deckMode==='lesson'?`startDrill(lessonDeck(curLesson),'lesson')`:`renderReview()`}">Run it again</button>
+      ${deckMode==="lesson"?`<button class="btn primary" onclick="setTab('quiz')">Take the check →</button>`:`<button class="btn primary" onclick="goHome()">Home</button>`}
+    </div></div>`);
+    return;
+  }
+  const c=deck[deckIdx];
+  const useTiles = tiles && !c.dlg;
+  if(useTiles && !tileState) initTiles(c);
+  const taskLine = c.task?`<div class="drill-task">${c.task}</div>`:"";
+  let body="";
+  if(useTiles){
+    const ansTiles=tileState.answer.map((t,i)=>`<button class="tile in-answer" onclick="tileBack(${i})">${esc(t.w)}</button>`).join("")||`<span style="color:var(--muted);font-size:13px">tap tiles below to build the sentence</span>`;
+    const bankTiles=tileState.bank.map((t,i)=>`<button class="tile" onclick="tilePick(${i})">${esc(t.w)}</button>`).join("");
+    const zoneClass=tileState.solved?"correct-zone":(tileState.wrong?"wrong-zone":"");
+    body=`<div class="drill-card">
+      <div class="drill-count">${deckIdx+1} / ${deck.length}</div>${taskLine}
+      <div class="drill-prompt">${esc(c.en)}</div>
+      ${ruHints?`<div class="drill-hint">${esc(c.ru)}</div>`:""}
+      ${tileState.solved?`<div class="drill-answer">${esc(c.es)}</div>`:""}
+    </div>
+    <div class="zone-label">Your sentence</div>
+    <div class="tile-zone answer ${zoneClass}">${ansTiles}</div>
+    ${tileState.solved?"":`<div class="zone-label">Tiles</div><div class="tile-zone">${bankTiles}</div>`}
+    <div class="drill-actions">
+      ${tileState.solved
+        ? `<button class="btn small" onclick="speak(deck[deckIdx].es)">♪ Hear it</button>
+           <button class="btn good" onclick="advanceDrill()">Next ✓</button>`
+        : `<button class="btn primary" onclick="checkTiles()">Check</button>
+           <button class="btn small" onclick="revealTiles()">Give up — show it</button>`}
+    </div>`;
+  }else{
+    body=`<div class="drill-card">
+      <div class="drill-count">${deckIdx+1} / ${deck.length}</div>${taskLine}
+      <div class="drill-prompt">${esc(c.en)}</div>
+      ${ruHints?`<div class="drill-hint">${esc(c.ru)}</div>`:""}
+      ${revealed?`<div class="drill-answer">${esc(c.es)}</div>`:""}
+    </div>
+    <div class="drill-actions">
+      ${revealed
+        ? `<button class="btn small" onclick="speak(deck[deckIdx].es)">♪ Hear it</button>
+           <button class="btn good" onclick="gradeDrill(true)">Got it ✓</button>
+           <button class="btn again" onclick="gradeDrill(false)">Again ↻</button>`
+        : `<button class="btn primary" onclick="revealDrill()">Say it aloud, then reveal</button>`}
+    </div>`;
+  }
+  h(`${topbar()}${drillHeader()}${body}`);
+}
+function tilePick(i){
+  const t=tileState.bank.splice(i,1)[0];
+  tileState.answer.push(t);tileState.wrong=false;renderDrill();
+}
+function tileBack(i){
+  const t=tileState.answer.splice(i,1)[0];
+  tileState.bank.push(t);tileState.wrong=false;renderDrill();
+}
+function norm(w){return w.toLowerCase();}
+function advanceDrill(){
+  deckIdx++;revealed=false;tileState=null;renderDrill();
+}
+function checkTiles(){
+  const got=tileState.answer.map(t=>norm(t.w));
+  const want=tileState.target.map(norm);
+  const ok=got.length===want.length&&got.every((w,i)=>w===want[i]);
+  const c=deck[deckIdx];
+  if(ok){
+    tileState.solved=true;
+    if(c._l!==undefined && !tileState.penalized)bumpScore(c._l,c._d,+1);
+    saveState();speak(c.es);
+  }else{
+    tileState.wrong=true;
+    if(c._l!==undefined && !tileState.penalized){bumpScore(c._l,c._d,-1);tileState.penalized=true;}
+    saveState();
+  }
+  renderDrill();
+}
+function revealTiles(){
+  tileState.solved=true;
+  tileState.penalized=true;   // no points for copying the shown answer
+  const c=deck[deckIdx];
+  if(c._l!==undefined)bumpScore(c._l,c._d,-1);
+  saveState();
+  deck.push(c);               // give-ups come back this session
+  speak(c.es);
+  renderDrill();
+}
+function revealDrill(){revealed=true;speak(deck[deckIdx].es);renderDrill();}
+function gradeDrill(ok){
+  const c=deck[deckIdx];
+  if(c._l!==undefined)bumpScore(c._l,c._d,ok?+1:-1);
+  if(!ok)deck.push(c);
+  deckIdx++;revealed=false;tileState=null;saveState();renderDrill();
+}
+
+/* ---------- quiz ---------- */
+let qIdx=0,qScore=0,qLocked=false;
+function startQuiz(){qIdx=0;qScore=0;qLocked=false;renderQuiz();}
+function renderQuiz(){
+  rerender=renderQuiz;
+  const L=LESSONS[curLesson];
+  const head=`<div class="crumb"><button onclick="goHome()">← All lessons</button><span>Lesson ${curLesson+1} of 16</span></div>
+  <div class="lesson-head"><h2>${L.title}</h2><div class="sub">${L.sub}</div></div>
+  <div class="tabs"><button class="tab" onclick="setTab('learn')">Learn</button><button class="tab" onclick="setTab('drill')">Drill</button><button class="tab on">Check</button></div>`;
+  if(qIdx>=L.quiz.length){
+    const passed=qScore>=Math.ceil(L.quiz.length*0.75);
+    progress[curLesson]=progress[curLesson]||{};
+    if(!progress[curLesson].quizBest||qScore>progress[curLesson].quizBest)progress[curLesson].quizBest=qScore;
+    saveState();
+    h(`${topbar()}${head}
+    <div class="q-result"><div class="score">${qScore} / ${L.quiz.length}</div>
+    <p>${passed?"Lesson passed — the algorithm is yours.":"Below 75% — run the drill once more, then retake."}</p>
+    <div class="drill-actions">
+      <button class="btn" onclick="startQuiz()">Retake</button>
+      ${passed&&curLesson<15?`<button class="btn primary" onclick="openLesson(${curLesson+1})">Next lesson →</button>`:`<button class="btn primary" onclick="goHome()">Home</button>`}
+    </div></div>`);
+    return;
+  }
+  const Q=L.quiz[qIdx];
+  const sh=Q.opts.map((o,i)=>({o,i}));
+  const seed=(curLesson*7+qIdx*13)%4;
+  for(let k=0;k<seed;k++)sh.push(sh.shift());
+  const opts=sh.map(({o,i})=>`<button class="q-opt" data-i="${i}" onclick="answerQuiz(${i},${Q.a})">${esc(o)}</button>`).join("");
+  h(`${topbar()}${head}
+  <div class="q-meta">Question ${qIdx+1} / ${L.quiz.length}</div>
+  <div class="q-question">${esc(Q.q)}</div>
+  <div class="q-opts">${opts}</div>`);
+  qLocked=false;
+}
+function answerQuiz(chosen,correct){
+  if(qLocked)return;qLocked=true;
+  document.querySelectorAll(".q-opt").forEach(b=>{
+    const i=+b.dataset.i;
+    if(i===correct)b.classList.add("correct");
+    else if(i===chosen)b.classList.add("wrong");
+  });
+  if(chosen===correct)qScore++;
+  setTimeout(()=>{qIdx++;renderQuiz();},900);
+}
+
+/* ---------- verb machine ---------- */
+let vmVerb="ser",vmTense="pres",vmRevealed=new Set();
+function renderVM(){
+  rerender=renderVM;
+  const verbBtns=Object.keys(VERBS).map(v=>`<button class="chip ${v===vmVerb?'on':''}" onclick="vmSet('${v}',null)">${v}</button>`).join("");
+  const tenseBtns=Object.keys(VERBS[vmVerb]).map(t=>`<button class="chip ${t===vmTense?'on':''}" onclick="vmSet(null,'${t}')">${TENSE_NAMES[t]}</button>`).join("");
+  const f=VERBS[vmVerb][vmTense];
+  const rows=PRONOUNS.map((p,i)=>{
+    const rev=vmRevealed.has(i);
+    return `<div class="vm-row"><span class="vm-pron">${p}</span>
+      <button class="vm-cell ${rev?'revealed':'hidden-cell'}" onclick="vmToggle(${i})">${f[i]}</button></div>`;
+  }).join("");
+  h(`${topbar()}
+  <div class="crumb"><button onclick="goHome()">← Home</button><span>Verb machine</span></div>
+  <div class="lesson-head"><h2>Verb machine</h2><div class="sub">Say each form aloud, tap to check — it also speaks</div></div>
+  <div class="section-label">Verbo</div><div class="vm-controls">${verbBtns}</div>
+  <div class="section-label">Tiempo</div><div class="vm-controls">${tenseBtns}</div>
+  <div class="vm-grid">${rows}</div>
+  <div class="drill-actions">
+    <button class="btn" onclick="vmHideAll()">Hide all</button>
+    <button class="btn primary" onclick="vmShowAll()">Reveal all</button>
+  </div>`);
+}
+function vmSet(v,t){if(v){vmVerb=v;if(!VERBS[v][vmTense])vmTense="pres";}if(t)vmTense=t;vmRevealed=new Set();renderVM();}
+function vmToggle(i){
+  if(vmRevealed.has(i)){vmRevealed.delete(i);}else{vmRevealed.add(i);speak(VERBS[vmVerb][vmTense][i]);}
+  renderVM();
+}
+function vmHideAll(){vmRevealed=new Set();renderVM();}
+function vmShowAll(){vmRevealed=new Set([0,1,2,3,4,5]);renderVM();}
+
+/* ---------- forms trainer ---------- */
+function renderFormsTrainer(){
+  rerender = renderFormsTrainer;
+  const head = `<div class="crumb"><button onclick="goHome()">← Home</button><span>7-Forms Trainer</span></div>
+  <div class="lesson-head"><h2>7-Forms Trainer</h2><div class="sub">Pick the tense, then conjugate</div></div>`;
+
+  h(`${topbar()}${head}
+  <div class="section-label">Hide secondary forms (Conditional, Pluperfect)</div>
+  <div class="vm-controls">
+    <button class="chip ${formsHideSecondary?'on':''}" onclick="toggleFormsSecondary()">Secondary Off</button>
+  </div>
+  <div class="drill-actions"><button class="btn primary" onclick="startFormsDrill()">Start Drill →</button></div>`);
+}
+function toggleFormsSecondary(){
+  formsHideSecondary = !formsHideSecondary;
+  saveState();
+  renderFormsTrainer();
+}
+function renderFormsDrill(){
+  rerender = renderFormsDrill;
+  if(formsIdx >= formsDeck.length){
+    const score = Object.values(formsScores).filter(v=>v>0).length;
+    h(`${topbar()}
+    <div class="crumb"><button onclick="goHome()">← Home</button><span>7-Forms Trainer</span></div>
+    <div class="drill-done"><h3>¡Muy bien!</h3><p>${formsDeck.length} scenarios drilled.</p>
+    <div class="drill-actions">
+      <button class="btn" onclick="startFormsDrill()">Run again</button>
+      <button class="btn primary" onclick="renderFormsTrainer()">Home</button>
+    </div></div>`);
+    return;
+  }
+
+  const scenario = formsDeck[formsIdx];
+  const tenseKey = scenario.tense;
+  const tenseName = FORM_TENSES[tenseKey].name;
+
+  const tenseOptions = Object.entries(FORM_TENSES)
+    .filter(([k,v]) => !formsHideSecondary || !['cond','plup'].includes(k))
+    .map(([k,v]) => `<button class="chip" onclick="selectFormsTense('${k}')">${v.name}</button>`)
+    .join("");
+
+  h(`${topbar()}
+  <div class="crumb"><button onclick="goHome()">← Home</button><span>7-Forms Trainer</span></div>
+  <div class="lesson-head"><h2>7-Forms Trainer</h2><div class="sub">${formsIdx+1} / ${formsDeck.length}</div></div>
+  <div class="drill-card">
+    <div class="drill-prompt">${esc(scenario.english)}</div>
+    ${ruHints?`<div class="drill-hint">${esc(scenario.ru)}</div>`:""}
+  </div>
+  <div class="section-label">Pick the tense</div>
+  <div class="vm-controls">${tenseOptions}</div>
+  <div class="drill-actions">
+    <button class="btn small" onclick="skipFormsScenario()">Skip</button>
+  </div>`);
+}
+
+function startFormsDrill(){
+  const filtered = formsHideSecondary
+    ? FORMS_SCENARIOS.filter(s=>!['cond','plup'].includes(s.tense))
+    : FORMS_SCENARIOS;
+  formsDeck = [...filtered];
+  for(let i=formsDeck.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [formsDeck[i],formsDeck[j]] = [formsDeck[j],formsDeck[i]];
+  }
+  formsIdx = 0;
+  renderFormsDrill();
+}
+
+function selectFormsTense(chosenTenseKey){
+  const scenario = formsDeck[formsIdx];
+  const correct = chosenTenseKey === scenario.tense;
+
+  const tenseName = FORM_TENSES[chosenTenseKey].name;
+  const correctTense = FORM_TENSES[scenario.tense].name;
+
+  if(correct){
+    formsScores[scenario.tense] = (formsScores[scenario.tense]||0) + 1;
+    h(`${topbar()}
+    <div class="crumb"><button onclick="goHome()">← Home</button></div>
+    <div class="drill-card">
+      <div class="drill-prompt">${esc(scenario.english)}</div>
+      <div class="drill-answer" style="color:var(--verde);">✓ Correct! ${correctTense}</div>
+    </div>
+    <div class="drill-actions">
+      <button class="btn good" onclick="advanceFormsDrill()">Next →</button>
+    </div>`);
+  }else{
+    formsScores[scenario.tense] = (formsScores[scenario.tense]||0) - 1;
+    h(`${topbar()}
+    <div class="crumb"><button onclick="goHome()">← Home</button></div>
+    <div class="drill-card">
+      <div class="drill-prompt">${esc(scenario.english)}</div>
+      <div class="drill-answer" style="color:var(--rojo);">✗ Wrong. It's ${correctTense}</div>
+    </div>
+    <div class="drill-actions">
+      <button class="btn again" onclick="renderFormsDrill()">Try again</button>
+      <button class="btn small" onclick="advanceFormsDrill()">Next anyway</button>
+    </div>`);
+  }
+  saveState();
+}
+
+function advanceFormsDrill(){
+  formsIdx++;
+  renderFormsDrill();
+}
+
+function skipFormsScenario(){
+  formsIdx++;
+  renderFormsDrill();
+}
+
+/* ---------- mixed review (weakness-weighted) ---------- */
+function renderReview(){
+  const opened=Object.keys(progress).map(Number);
+  const src=opened.length?opened:[0];
+  let pool=[];
+  src.forEach(li=>{
+    if(!LESSONS[li])return;
+    LESSONS[li].drills.forEach((d,di)=>{
+      const s=scores[scoreKey(li,di)]||0;
+      const weight=6-s;                 // weak items weigh more
+      pool.push({item:{...d,_l:li,_d:di},weight});
+    });
+  });
+  const out=[];
+  while(pool.length&&out.length<14){
+    const total=pool.reduce((a,p)=>a+p.weight,0);
+    let r=Math.random()*total;
+    let idx=0;
+    for(let i=0;i<pool.length;i++){r-=pool[i].weight;if(r<=0){idx=i;break;}}
+    out.push(pool.splice(idx,1)[0].item);
+  }
+  startDrill(out,"review");
+}
+
+/* ---------- boot ---------- */
+loadState().then(renderHome);
+</script>
+</body>
+</html>
