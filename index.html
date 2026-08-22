@@ -126,7 +126,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
     <input id="api-key-input" type="password" placeholder="sk-..." style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--board2);color:var(--chalk);margin-bottom:20px;font-family:monospace;font-size:12px;">
     <label style="display:block;margin-bottom:10px;font-size:14px;">Voice</label>
     <select id="voice-select" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--board2);color:var(--chalk);margin-bottom:20px;">
-      <option value="EXAVITQu4vr4xnSDxMaL">Lola (Spain Spanish - Recommended)</option>
+      <option value="GB7fZx4ubHWxbBE05abF">User Preference (Recommended)</option>
+      <option value="EXAVITQu4vr4xnSDxMaL">Lola (Spain Spanish)</option>
       <option value="onwK4e9ZjoDqKdo5aXM9">Pablo (Spain Spanish)</option>
     </select>
     <div style="display:flex;gap:10px;justify-content:flex-end;">
@@ -588,7 +589,7 @@ if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = 
 
 /* ---------- elevenlabs tts ---------- */
 let elevenLabsApiKey = null;
-let elevenLabsVoiceId = "EXAVITQu4vr4xnSDxMaL";  // Lola (Spain Spanish)
+let elevenLabsVoiceId = "GB7fZx4ubHWxbBE05abF";  // User's preferred voice
 let audioCache = {};  // {text: audioUrl} for caching
 const ELEVENLABS_API_URL = "https://api.elevenlabs.io/v1/text-to-speech";
 
