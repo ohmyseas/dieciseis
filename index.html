@@ -1468,7 +1468,6 @@ function toast(msg, isError){
 async function speak(text){
   if(!text) return;
   if(!ttsKey){
-    // Auto-prompt on first tap
     toast("Tap the 🔊 button in the top bar to add your ElevenLabs API key.", true);
     return;
   }
@@ -1479,23 +1478,42 @@ async function speak(text){
     return;
   }
   try{
+    console.log("[TTS] Sending:", clean, "voiceId:", VOICE_ID, "keyPrefix:", ttsKey.slice(0,6)+"...");
     const r = await fetch("/api/speak",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({text:clean,apiKey:ttsKey,voiceId:VOICE_ID})
     });
+    console.log("[TTS] Response status:", r.status);
     if(!r.ok){
-      let msg = "Audio failed: HTTP " + r.status;
-      try{const j = await r.json(); if(j.error) msg = j.error.slice(0,140);}catch(e){}
-      if(r.status===401) msg = "API key rejected by ElevenLabs. Tap 🔊 to re-enter.";
-      toast(msg, true);
+      let body = "";
+      try{ body = await r.text(); }catch(e){}
+      console.error("[TTS] Full error body:", body);
+      // Try to parse error message from ElevenLabs
+      let userMsg = "HTTP " + r.status;
+      try{
+        const j = JSON.parse(body);
+        if(j.error){
+          // Nested ElevenLabs error
+          const inner = typeof j.error === "string" ? j.error : JSON.stringify(j.error);
+          const parsed = inner.match(/"message":"([^"]+)"/);
+          userMsg = parsed ? parsed[1] : inner.slice(0, 200);
+        }
+      }catch(e){ userMsg = body.slice(0, 200) || ("HTTP " + r.status); }
+      toast("TTS error: " + userMsg, true);
       return;
     }
     const blob = await r.blob();
+    console.log("[TTS] Got audio blob, size:", blob.size, "type:", blob.type);
     const url = URL.createObjectURL(blob);
     audioCache[clean] = url;
-    new Audio(url).play().catch(e=>toast("Browser blocked audio. Tap the sound button again.",true));
+    const audio = new Audio(url);
+    audio.play().then(()=>console.log("[TTS] Playing")).catch(e=>{
+      console.error("[TTS] Autoplay blocked:", e);
+      toast("Browser blocked audio. Tap the sound button again.", true);
+    });
   }catch(e){
+    console.error("[TTS] Network error:", e);
     toast("Network error: " + e.message, true);
   }
 }
@@ -1520,14 +1538,11 @@ function askForKey(){
     rerender();
     return;
   }
-  // Validate: real keys start with sk_ and are long
-  if(!trimmed.startsWith("sk_")){
-    toast("That looks like a Key ID, not the API key. The real key starts with 'sk_'. Tap 🔊 again.", true);
-    return;
-  }
-  if(trimmed.length < 40){
-    toast("That key seems too short. Full API keys are ~50 chars. Tap 🔊 again.", true);
-    return;
+  // Warn if it looks like a key ID rather than the actual key
+  if(trimmed.length < 30){
+    if(!confirm("This looks short for an API key (only " + trimmed.length + " chars). ElevenLabs keys are usually 40-60+ chars. Save anyway?")){
+      return;
+    }
   }
   ttsKey = trimmed;
   localStorage.setItem("dieciseis:ttsKey", ttsKey);
