@@ -1749,14 +1749,17 @@ function lessonDeck(i){return LESSONS[i].drills.map((d,di)=>({...d,_l:i,_d:di}))
 
 const TENSE_MAP = {pres:"present",pret:"preterite",imp:"imperfect",fut:"future"};
 function normalizeTense(t){return TENSE_MAP[t] || t;}
+function speakEsc(s){return String(s).replace(/'/g,"\\'").replace(/<[^>]+>/g,"");}
 function matrixHTML(t){
-  if(t.rows){return `<div class="matrix"><h4>${t.title}</h4><table>${t.rows.map(r=>`<tr><td class="pron">${r[0]}</td><td class="form">${r[1]}</td></tr>`).join("")}</table></div>`;}
+  if(t.rows){
+    return `<div class="matrix"><h4>${t.title}</h4><table>${t.rows.map(r=>`<tr><td class="pron" onclick="speak('${speakEsc(r[0])}')" style="cursor:pointer" title="Tap to hear">${r[0]} 🔊</td><td class="form">${r[1]}</td></tr>`).join("")}</table></div>`;
+  }
   const verb=VERBS[t.verbKey];
   if(!verb){console.error('[ERROR] Verb not found:',t.verbKey);return `<div class="matrix"><h4>${t.title}</h4><p style="color:var(--rojo)">Verb data missing: ${t.verbKey}</p></div>`;}
   const tense=normalizeTense(t.tense);
   const f=verb[tense];
   if(!f){console.error('[ERROR] Tense not found:',t.verbKey,tense);return `<div class="matrix"><h4>${t.title}</h4><p style="color:var(--rojo)">Tense data missing: ${tense}</p></div>`;}
-  return `<div class="matrix"><h4>${t.title}</h4><table>${PRONOUNS.map((p,i)=>`<tr><td class="pron">${p}</td><td class="form">${f[i]}</td></tr>`).join("")}</table></div>`;
+  return `<div class="matrix"><h4>${t.title} <button class="chip" style="min-height:28px;padding:4px 8px;font-size:11px;margin-left:6px" onclick="speak('${speakEsc(f.join(', '))}')" title="Play all">🔊 all</button></h4><table>${PRONOUNS.map((p,i)=>`<tr><td class="pron">${p}</td><td class="form" onclick="speak('${speakEsc(f[i])}')" style="cursor:pointer" title="Tap to hear">${f[i]} 🔊</td></tr>`).join("")}</table></div>`;
 }
 function renderLesson(){
   rerender=renderLesson;
@@ -1833,7 +1836,7 @@ function renderDrill(){
       <div class="drill-count">${deckIdx+1} / ${deck.length}</div>${taskLine}
       <div class="drill-prompt">${esc(c.en)}</div>
       ${ruHints?`<div class="drill-hint">${esc(c.ru)}</div>`:""}
-      ${tileState.solved?`<div class="drill-answer">${esc(c.es)}</div>`:""}
+      ${tileState.solved?`<div class="drill-answer" onclick="speak('${speakEsc(c.es)}')" style="cursor:pointer" title="Tap to hear">${esc(c.es)} 🔊</div>`:""}
     </div>
     <div class="zone-label">Your sentence</div>
     <div class="tile-zone answer ${zoneClass}">${ansTiles}</div>
@@ -1850,7 +1853,7 @@ function renderDrill(){
       <div class="drill-count">${deckIdx+1} / ${deck.length}</div>${taskLine}
       <div class="drill-prompt">${esc(c.en)}</div>
       ${ruHints?`<div class="drill-hint">${esc(c.ru)}</div>`:""}
-      ${revealed?`<div class="drill-answer">${esc(c.es)}</div>`:""}
+      ${revealed?`<div class="drill-answer" onclick="speak('${speakEsc(c.es)}')" style="cursor:pointer" title="Tap to hear">${esc(c.es)} 🔊</div>`:""}
     </div>
     <div class="drill-actions">
       ${revealed
@@ -1955,10 +1958,10 @@ function renderQuiz(){
   const sh=Q.opts.map((o,i)=>({o,i}));
   const seed=(curLesson*7+qIdx*13)%4;
   for(let k=0;k<seed;k++)sh.push(sh.shift());
-  const opts=sh.map(({o,i})=>`<button class="q-opt" data-i="${i}" onclick="answerQuiz(${i},${Q.a})">${esc(o)}</button>`).join("");
+  const opts=sh.map(({o,i})=>`<div style="display:flex;gap:6px"><button class="q-opt" data-i="${i}" onclick="answerQuiz(${i},${Q.a})" style="flex:1">${esc(o)}</button><button class="chip" style="min-height:44px;padding:8px 12px" onclick="event.stopPropagation();speak('${speakEsc(o)}')" title="Hear this option">🔊</button></div>`).join("");
   h(`${topbar()}${head}
   <div class="q-meta">Question ${qIdx+1} / ${L.quiz.length}</div>
-  <div class="q-question">${esc(Q.q)}</div>
+  <div class="q-question" onclick="speak('${speakEsc(Q.q.replace(/_+/g,''))}')" style="cursor:pointer" title="Tap to hear">${esc(Q.q)} <span style="color:var(--muted);font-size:14px">🔊</span></div>
   <div class="q-opts">${opts}</div>`);
   qLocked=false;
 }
@@ -2134,7 +2137,13 @@ function renderVMList(){
 }
 function vmItemHTML(v){
   const meta=VERB_META[v]||{en:"—"};
-  return `<button class="vm-verb-item" onclick="vmPick('${v}')"><span class="es">${v}</span><span class="en">${meta.en}</span></button>`;
+  return `<div class="vm-verb-item" style="display:flex;flex-direction:row;align-items:center;gap:8px;padding:0;overflow:hidden">
+    <button style="flex:1;background:none;border:none;padding:10px 12px;text-align:left;cursor:pointer;color:inherit;display:flex;flex-direction:column" onclick="vmPick('${v}')">
+      <span class="es">${v}</span>
+      <span class="en">${meta.en}</span>
+    </button>
+    <button class="chip" style="min-height:36px;padding:6px 10px;margin-right:8px;font-size:13px" onclick="event.stopPropagation();speak('${speakEsc(v)}')" title="Hear ${v}">🔊</button>
+  </div>`;
 }
 function renderVMTable(){
   const meta=VERB_META[vmVerb]||{en:"—",cat:"other"};
@@ -2255,6 +2264,7 @@ function selectFormsTense(chosenTenseKey){
   const tenseName = FORM_TENSES[chosenTenseKey].name;
   const correctTense = FORM_TENSES[scenario.tense].name;
 
+  const esAnswer = scenario.answer || '';
   if(correct){
     formsScores[scenario.tense] = (formsScores[scenario.tense]||0) + 1;
     h(`${topbar()}
@@ -2262,6 +2272,7 @@ function selectFormsTense(chosenTenseKey){
     <div class="drill-card">
       <div class="drill-prompt">${esc(scenario.english)}</div>
       <div class="drill-answer" style="color:var(--verde);">✓ Correct! ${correctTense}</div>
+      ${esAnswer?`<div class="drill-answer" onclick="speak('${speakEsc(esAnswer)}')" style="cursor:pointer;font-size:20px" title="Tap to hear">${esc(esAnswer)} 🔊</div>`:''}
     </div>
     <div class="drill-actions">
       <button class="btn good" onclick="advanceFormsDrill()">Next →</button>
@@ -2273,6 +2284,7 @@ function selectFormsTense(chosenTenseKey){
     <div class="drill-card">
       <div class="drill-prompt">${esc(scenario.english)}</div>
       <div class="drill-answer" style="color:var(--rojo);">✗ Wrong. It's ${correctTense}</div>
+      ${esAnswer?`<div class="drill-answer" onclick="speak('${speakEsc(esAnswer)}')" style="cursor:pointer;font-size:20px" title="Tap to hear">${esc(esAnswer)} 🔊</div>`:''}
     </div>
     <div class="drill-actions">
       <button class="btn again" onclick="renderFormsDrill()">Try again</button>
