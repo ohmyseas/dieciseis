@@ -1032,122 +1032,7 @@ const TENSE_EN = {present:"Present — I speak",preterite:"Past — I spoke",imp
 const TENSE_EN_SHORT = {present:"Present",preterite:"Past",imperfect:"Imperfect",future:"Future",conditional:"Would",subjunctive:"Subj."};
 
 // Add 35 missing top-frequency verbs (from ~114 top-freq check)
-(function addMissingVerbs(){
-  const spellingChange = {llegar:'gu',pagar:'gu',buscar:'qu',explicar:'qu',tocar:'qu',sacar:'qu',utilizar:'c',realizar:'c',alcanzar:'c'};
-  function conjRegular(inf){
-    const stem = inf.slice(0,-2), type = inf.slice(-2), sp = spellingChange[inf];
-    let yoPret = stem + (type==='ar'?'é':'í');
-    if(sp==='qu') yoPret = stem.slice(0,-1)+'qué';
-    else if(sp==='gu') yoPret = stem.slice(0,-1)+'gué';
-    else if(sp==='c') yoPret = stem.slice(0,-1)+'cé';
-    const out = {};
-    if(type==='ar'){
-      out.present = ['o','as','a','amos','áis','an'].map(e=>stem+e);
-      out.preterite = [yoPret,stem+'aste',stem+'ó',stem+'amos',stem+'asteis',stem+'aron'];
-      out.imperfect = ['aba','abas','aba','ábamos','abais','aban'].map(e=>stem+e);
-    }else{
-      out.present = ['o','es','e',type==='er'?'emos':'imos',type==='er'?'éis':'ís','en'].map(e=>stem+e);
-      out.preterite = [yoPret,stem+'iste',stem+'ió',stem+'imos',stem+'isteis',stem+'ieron'];
-      out.imperfect = ['ía','ías','ía','íamos','íais','ían'].map(e=>stem+e);
-    }
-    out.future = ['é','ás','á','emos','éis','án'].map(e=>inf+e);
-    return out;
-  }
-  const regs = [
-    ['llegar','to arrive','movement'],['pagar','to pay','money'],
-    ['cambiar','to change','actions'],['gustar','to please / to be liked','mind'],
-    ['quedar','to stay / to meet up / to remain','actions'],['buscar','to look for / to search','actions'],
-    ['explicar','to explain','communication'],['intentar','to try / to attempt','actions'],
-    ['preparar','to prepare','daily'],['tocar','to touch / to play (instrument)','creative'],
-    ['sacar','to take out / to get','actions'],['contestar','to answer / to reply','communication'],
-    ['acabar','to finish / to end','actions'],['presentar','to introduce / to present','communication'],
-    ['crear','to create','work'],['formar','to form / to shape','work'],
-    ['aceptar','to accept','actions'],['tratar','to try / to deal with / to treat','actions'],
-    ['considerar','to consider','mind'],['resultar','to result / to turn out','actions'],
-    ['lograr','to achieve / to manage','actions'],['levantar','to lift / to raise','actions'],
-    ['utilizar','to use / to utilize','work'],['realizar','to carry out / to make happen','work'],
-    ['alcanzar','to reach / to catch up','actions'],['continuar','to continue','actions'],
-    ['emprender','to undertake / to start','work'],['existir','to exist','life'],
-    ['ocurrir','to occur / to happen','life'],['descubrir','to discover','mind'],
-    ['partir','to leave / to split','movement'],['dirigir','to direct / to lead','communication']
-  ];
-  regs.forEach(([inf,en,cat])=>{
-    if(!VERBS[inf]) VERBS[inf] = conjRegular(inf);
-    VERB_META[inf] = {en, cat};
-  });
-  // continuar: accented ú in present singular + ellos
-  VERBS.continuar.present = ['continúo','continúas','continúa','continuamos','continuáis','continúan'];
-  // dirigir: g→j in yo present
-  VERBS.dirigir.present[0] = 'dirijo';
-  // Irregulars (hand-specified)
-  VERBS.suponer = {
-    present:['supongo','supones','supone','suponemos','suponéis','suponen'],
-    preterite:['supuse','supusiste','supuso','supusimos','supusisteis','supusieron'],
-    imperfect:['suponía','suponías','suponía','suponíamos','suponíais','suponían'],
-    future:['supondré','supondrás','supondrá','supondremos','supondréis','supondrán']
-  };
-  VERB_META.suponer = {en:'to suppose', cat:'mind'};
-  VERBS['oír'] = {
-    present:['oigo','oyes','oye','oímos','oís','oyen'],
-    preterite:['oí','oíste','oyó','oímos','oísteis','oyeron'],
-    imperfect:['oía','oías','oía','oíamos','oíais','oían'],
-    future:['oiré','oirás','oirá','oiremos','oiréis','oirán']
-  };
-  VERB_META['oír'] = {en:'to hear', cat:'perception'};
-  VERBS.reconocer = {
-    present:['reconozco','reconoces','reconoce','reconocemos','reconocéis','reconocen'],
-    preterite:['reconocí','reconociste','reconoció','reconocimos','reconocisteis','reconocieron'],
-    imperfect:['reconocía','reconocías','reconocía','reconocíamos','reconocíais','reconocían'],
-    future:['reconoceré','reconocerás','reconocerá','reconoceremos','reconoceréis','reconocerán']
-  };
-  VERB_META.reconocer = {en:'to recognize', cat:'mind'};
-})();
-
-// Derive Conditional from Future (same stem, different endings)
-(function deriveConditional(){
-  const futEnd = ["é","ás","á","emos","éis","án"];
-  const condEnd = ["ía","ías","ía","íamos","íais","ían"];
-  Object.keys(VERBS).forEach(v=>{
-    const fut = VERBS[v].future;
-    if(!fut || fut.length!==6) return;
-    VERBS[v].conditional = fut.map((form,i)=>{
-      const ending = futEnd[i];
-      if(form.endsWith(ending)) return form.slice(0, -ending.length) + condEnd[i];
-      return form;
-    });
-  });
-})();
-
-// Derive Present Subjunctive from yo-present indicative
-// Rule: drop -o from yo-present, add opposite-family endings
-//   -AR verbs: e/es/e/emos/éis/en
-//   -ER/-IR verbs: a/as/a/amos/áis/an
-// Auto-preserves irregular stems (tengo → tenga, hago → haga, etc.)
-(function deriveSubjunctive(){
-  Object.keys(VERBS).forEach(inf=>{
-    const v = VERBS[inf];
-    if(!v.present || !v.present[0]) return;
-    const yo = v.present[0];
-    if(!yo.endsWith('o')) return;
-    const stem = yo.slice(0,-1);
-    const type = inf.slice(-2);
-    const endings = (type==='ar')
-      ? ['e','es','e','emos','éis','en']
-      : ['a','as','a','amos','áis','an'];
-    v.subjunctive = endings.map(e => stem + e);
-  });
-  // Fully-irregular subjunctive overrides (yo→o rule doesn't work for these)
-  const overrides = {
-    ser:['sea','seas','sea','seamos','seáis','sean'],
-    estar:['esté','estés','esté','estemos','estéis','estén'],
-    ir:['vaya','vayas','vaya','vayamos','vayáis','vayan'],
-    haber:['haya','hayas','haya','hayamos','hayáis','hayan'],
-    saber:['sepa','sepas','sepa','sepamos','sepáis','sepan'],
-    dar:['dé','des','dé','demos','deis','den'],
-    ver:['vea','veas','vea','veamos','veáis','vean']
-  };
-  Object.keys(overrides).forEach(v=>{ if(VERBS[v]) VERBS[v].subjunctive = overrides[v]; });
-})();
+// (Verb-augmentation IIFEs moved to run AFTER VERB_META is defined — see below)
 const DISTRACTORS = ["es","está","son","tiene","muy","no","el","la","los","de","en","que","y","con","mi","su","por","a"];
 
 const LESSONS = [
@@ -2612,6 +2497,118 @@ const VERB_CATEGORIES = [
   {key:"creative",label:"Creative & Fun",desc:"Sing, play, smile"},
   {key:"weather",label:"Weather",desc:"Rain, snow, etc"}
 ];
+
+/* ---------- verb-data augmentation (runs after VERBS + VERB_META are defined) ---------- */
+
+// Add 35 missing top-frequency verbs
+(function addMissingVerbs(){
+  const spellingChange = {llegar:'gu',pagar:'gu',buscar:'qu',explicar:'qu',tocar:'qu',sacar:'qu',utilizar:'c',realizar:'c',alcanzar:'c'};
+  function conjRegular(inf){
+    const stem = inf.slice(0,-2), type = inf.slice(-2), sp = spellingChange[inf];
+    let yoPret = stem + (type==='ar'?'é':'í');
+    if(sp==='qu') yoPret = stem.slice(0,-1)+'qué';
+    else if(sp==='gu') yoPret = stem.slice(0,-1)+'gué';
+    else if(sp==='c') yoPret = stem.slice(0,-1)+'cé';
+    const out = {};
+    if(type==='ar'){
+      out.present = ['o','as','a','amos','áis','an'].map(e=>stem+e);
+      out.preterite = [yoPret,stem+'aste',stem+'ó',stem+'amos',stem+'asteis',stem+'aron'];
+      out.imperfect = ['aba','abas','aba','ábamos','abais','aban'].map(e=>stem+e);
+    }else{
+      out.present = ['o','es','e',type==='er'?'emos':'imos',type==='er'?'éis':'ís','en'].map(e=>stem+e);
+      out.preterite = [yoPret,stem+'iste',stem+'ió',stem+'imos',stem+'isteis',stem+'ieron'];
+      out.imperfect = ['ía','ías','ía','íamos','íais','ían'].map(e=>stem+e);
+    }
+    out.future = ['é','ás','á','emos','éis','án'].map(e=>inf+e);
+    return out;
+  }
+  const regs = [
+    ['llegar','to arrive','movement'],['pagar','to pay','money'],
+    ['cambiar','to change','actions'],['gustar','to please / to be liked','mind'],
+    ['quedar','to stay / to meet up / to remain','actions'],['buscar','to look for / to search','actions'],
+    ['explicar','to explain','communication'],['intentar','to try / to attempt','actions'],
+    ['preparar','to prepare','daily'],['tocar','to touch / to play (instrument)','creative'],
+    ['sacar','to take out / to get','actions'],['contestar','to answer / to reply','communication'],
+    ['acabar','to finish / to end','actions'],['presentar','to introduce / to present','communication'],
+    ['crear','to create','work'],['formar','to form / to shape','work'],
+    ['aceptar','to accept','actions'],['tratar','to try / to deal with / to treat','actions'],
+    ['considerar','to consider','mind'],['resultar','to result / to turn out','actions'],
+    ['lograr','to achieve / to manage','actions'],['levantar','to lift / to raise','actions'],
+    ['utilizar','to use / to utilize','work'],['realizar','to carry out / to make happen','work'],
+    ['alcanzar','to reach / to catch up','actions'],['continuar','to continue','actions'],
+    ['emprender','to undertake / to start','work'],['existir','to exist','life'],
+    ['ocurrir','to occur / to happen','life'],['descubrir','to discover','mind'],
+    ['partir','to leave / to split','movement'],['dirigir','to direct / to lead','communication']
+  ];
+  regs.forEach(([inf,en,cat])=>{
+    if(!VERBS[inf]) VERBS[inf] = conjRegular(inf);
+    VERB_META[inf] = {en, cat};
+  });
+  VERBS.continuar.present = ['continúo','continúas','continúa','continuamos','continuáis','continúan'];
+  VERBS.dirigir.present[0] = 'dirijo';
+  VERBS.suponer = {
+    present:['supongo','supones','supone','suponemos','suponéis','suponen'],
+    preterite:['supuse','supusiste','supuso','supusimos','supusisteis','supusieron'],
+    imperfect:['suponía','suponías','suponía','suponíamos','suponíais','suponían'],
+    future:['supondré','supondrás','supondrá','supondremos','supondréis','supondrán']
+  };
+  VERB_META.suponer = {en:'to suppose', cat:'mind'};
+  VERBS['oír'] = {
+    present:['oigo','oyes','oye','oímos','oís','oyen'],
+    preterite:['oí','oíste','oyó','oímos','oísteis','oyeron'],
+    imperfect:['oía','oías','oía','oíamos','oíais','oían'],
+    future:['oiré','oirás','oirá','oiremos','oiréis','oirán']
+  };
+  VERB_META['oír'] = {en:'to hear', cat:'perception'};
+  VERBS.reconocer = {
+    present:['reconozco','reconoces','reconoce','reconocemos','reconocéis','reconocen'],
+    preterite:['reconocí','reconociste','reconoció','reconocimos','reconocisteis','reconocieron'],
+    imperfect:['reconocía','reconocías','reconocía','reconocíamos','reconocíais','reconocían'],
+    future:['reconoceré','reconocerás','reconocerá','reconoceremos','reconoceréis','reconocerán']
+  };
+  VERB_META.reconocer = {en:'to recognize', cat:'mind'};
+})();
+
+// Derive Conditional from Future (same stem, different endings)
+(function deriveConditional(){
+  const futEnd = ["é","ás","á","emos","éis","án"];
+  const condEnd = ["ía","ías","ía","íamos","íais","ían"];
+  Object.keys(VERBS).forEach(v=>{
+    const fut = VERBS[v].future;
+    if(!fut || fut.length!==6) return;
+    VERBS[v].conditional = fut.map((form,i)=>{
+      const ending = futEnd[i];
+      if(form.endsWith(ending)) return form.slice(0, -ending.length) + condEnd[i];
+      return form;
+    });
+  });
+})();
+
+// Derive Present Subjunctive from yo-present indicative
+(function deriveSubjunctive(){
+  Object.keys(VERBS).forEach(inf=>{
+    const v = VERBS[inf];
+    if(!v.present || !v.present[0]) return;
+    const yo = v.present[0];
+    if(!yo.endsWith('o')) return;
+    const stem = yo.slice(0,-1);
+    const type = inf.slice(-2);
+    const endings = (type==='ar')
+      ? ['e','es','e','emos','éis','en']
+      : ['a','as','a','amos','áis','an'];
+    v.subjunctive = endings.map(e => stem + e);
+  });
+  const overrides = {
+    ser:['sea','seas','sea','seamos','seáis','sean'],
+    estar:['esté','estés','esté','estemos','estéis','estén'],
+    ir:['vaya','vayas','vaya','vayamos','vayáis','vayan'],
+    haber:['haya','hayas','haya','hayamos','hayáis','hayan'],
+    saber:['sepa','sepas','sepa','sepamos','sepáis','sepan'],
+    dar:['dé','des','dé','demos','deis','den'],
+    ver:['vea','veas','vea','veamos','veáis','vean']
+  };
+  Object.keys(overrides).forEach(v=>{ if(VERBS[v]) VERBS[v].subjunctive = overrides[v]; });
+})();
 
 let vmVerb=null,vmTense="present",vmRevealed=new Set(),vmFilter="",vmCat="all";
 
