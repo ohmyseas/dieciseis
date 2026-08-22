@@ -1437,6 +1437,105 @@ const FORM_TENSES = {      // metadata for each tense form
   cond: { name: "Conditional", en: "I would eat", es: "Condicional" },
   plup: { name: "Pluperfect", en: "I had eaten", es: "Pretérito Pluscuamperfecto" }
 };
+/* ---------- reference libraries (Numbers, Time, Phrases, Slang, Cultural) ---------- */
+
+// Number to Spanish (0-9999)
+const NUM_UNITS = ["","uno","dos","tres","cuatro","cinco","seis","siete","ocho","nueve"];
+const NUM_TEENS = {10:"diez",11:"once",12:"doce",13:"trece",14:"catorce",15:"quince",16:"dieciséis",17:"diecisiete",18:"dieciocho",19:"diecinueve",20:"veinte",21:"veintiuno",22:"veintidós",23:"veintitrés",24:"veinticuatro",25:"veinticinco",26:"veintiséis",27:"veintisiete",28:"veintiocho",29:"veintinueve"};
+const NUM_TENS = ["","","veinte","treinta","cuarenta","cincuenta","sesenta","setenta","ochenta","noventa"];
+const NUM_HUNDREDS = ["","cien","doscientos","trescientos","cuatrocientos","quinientos","seiscientos","setecientos","ochocientos","novecientos"];
+function numToSpanish(n){
+  n=Math.floor(Math.abs(n));
+  if(n===0)return "cero";
+  if(n<10)return NUM_UNITS[n];
+  if(n<30)return NUM_TEENS[n];
+  if(n<100){const t=Math.floor(n/10),u=n%10;return NUM_TENS[t]+(u?" y "+NUM_UNITS[u]:"");}
+  if(n===100)return "cien";
+  if(n<1000){const h=Math.floor(n/100),r=n%100;const hword=(h===1?"ciento":NUM_HUNDREDS[h]);return hword+(r?" "+numToSpanish(r):"");}
+  if(n<1000000){const th=Math.floor(n/1000),r=n%1000;const thword=(th===1?"mil":numToSpanish(th)+" mil");return thword+(r?" "+numToSpanish(r):"");}
+  return String(n);
+}
+const NUMBER_LANDMARKS = [
+  {n:0,note:"zero"},{n:1,note:"one"},{n:5,note:""},{n:10,note:""},{n:15,note:""},{n:16,note:"our app name"},{n:20,note:""},{n:21,note:"veintiuno"},{n:30,note:""},{n:50,note:""},{n:75,note:"tricky: setenta y cinco"},{n:99,note:""},{n:100,note:"cien / ciento"},{n:101,note:"ciento uno (not 'cien uno')"},{n:200,note:""},{n:500,note:"quinientos (irregular)"},{n:700,note:"setecientos (irregular)"},{n:900,note:"novecientos (irregular)"},{n:1000,note:"mil"},{n:1999,note:""},{n:2026,note:"current year"},{n:10000,note:"diez mil"},{n:100000,note:"cien mil"},{n:1000000,note:"un millón"}
+];
+
+// Time expressions
+const TIME_DATA = [
+  {cat:"Hours",items:[["Es la una","1:00"],["Son las dos","2:00"],["Son las tres","3:00"],["Son las doce","12:00"],["Son las dos y cuarto","2:15"],["Son las dos y media","2:30"],["Son las tres menos cuarto","2:45"],["Son las tres menos diez","2:50"],["mediodía","noon"],["medianoche","midnight"],["por la mañana","in the morning"],["por la tarde","in the afternoon"],["por la noche","at night"],["de madrugada","in the pre-dawn"]]},
+  {cat:"Days & Months",items:[["lunes","Monday"],["martes","Tuesday"],["miércoles","Wednesday"],["jueves","Thursday"],["viernes","Friday"],["sábado","Saturday"],["domingo","Sunday"],["enero","January"],["febrero","February"],["marzo","March"],["abril","April"],["mayo","May"],["junio","June"],["julio","July"],["agosto","August"],["septiembre","September"],["octubre","October"],["noviembre","November"],["diciembre","December"]]},
+  {cat:"Time expressions",items:[["ahora","now"],["ahora mismo","right now"],["en un rato","in a while"],["más tarde","later"],["luego","later / then"],["pronto","soon"],["hoy","today"],["ayer","yesterday"],["anteayer","day before yesterday"],["mañana","tomorrow"],["pasado mañana","day after tomorrow"],["esta noche","tonight"],["anoche","last night"],["la semana pasada","last week"],["la próxima semana","next week"],["hace un rato","a while ago"],["hace dos días","two days ago"],["dentro de una hora","in an hour"],["dentro de tres días","in three days"],["todavía","still / yet"],["ya","already"],["nunca","never"],["siempre","always"],["a veces","sometimes"],["a menudo","often"]]},
+  {cat:"Seasons",items:[["primavera","spring"],["verano","summer"],["otoño","autumn / fall"],["invierno","winter"],["en verano","in summer"]]}
+];
+
+// Essential phrases (organized by situation)
+const PHRASES_DATA = [
+  {cat:"Greetings & goodbyes",items:[["Hola","Hello"],["Buenos días","Good morning"],["Buenas tardes","Good afternoon"],["Buenas noches","Good night"],["¿Qué tal?","What's up?"],["¿Cómo estás?","How are you?"],["¿Cómo va?","How's it going?"],["Bien, gracias","Well, thanks"],["Regular","So-so"],["Fatal","Terrible"],["Encantado / Encantada","Nice to meet you"],["Mucho gusto","Pleased to meet you"],["Adiós","Goodbye"],["Hasta luego","See you later"],["Hasta pronto","See you soon"],["Hasta mañana","See you tomorrow"],["¡Chao!","Bye!"],["Cuídate","Take care"]]},
+  {cat:"Courtesy",items:[["Por favor","Please"],["Gracias","Thank you"],["Muchas gracias","Thanks a lot"],["De nada","You're welcome"],["Perdón","Excuse me / Sorry"],["Disculpa","Excuse me (getting attention)"],["Lo siento","I'm sorry"],["Con permiso","With your permission (passing by)"],["No pasa nada","No worries"],["No hay problema","No problem"],["Claro","Of course"],["Por supuesto","Of course"],["Vale","OK (Spain)"],["De acuerdo","Agreed"]]},
+  {cat:"Restaurant",items:[["¿Me trae la carta, por favor?","May I have the menu?"],["Una mesa para dos","A table for two"],["La cuenta, por favor","The bill, please"],["¿Está incluido?","Is it included?"],["Sin gluten","Gluten-free"],["Sin picante","Not spicy"],["Soy alérgico a...","I'm allergic to..."],["Para llevar","To go / takeaway"],["Un café con leche","A coffee with milk"],["Un cortado","Espresso with a splash of milk"],["Un vaso de agua","A glass of water"],["Estaba delicioso","It was delicious"],["¡Qué rico!","How delicious!"]]},
+  {cat:"Hotel & travel",items:[["Tengo una reserva","I have a reservation"],["¿A qué hora es el check-in?","What time is check-in?"],["¿Hay wifi?","Is there wifi?"],["¿Cuál es la contraseña?","What's the password?"],["Una habitación doble","A double room"],["Con desayuno","With breakfast"],["¿Dónde está la estación?","Where is the station?"],["Un billete para...","A ticket to..."],["¿Cuánto cuesta?","How much does it cost?"],["¿Está lejos?","Is it far?"],["¿Puede llamarme un taxi?","Can you call me a taxi?"],["Estoy perdido","I'm lost"]]},
+  {cat:"Shopping",items:[["¿Cuánto vale?","How much is it?"],["¿Aceptan tarjeta?","Do you accept card?"],["¿Tiene otro color?","Do you have another color?"],["Más pequeño / más grande","Smaller / bigger"],["¿Puedo probármelo?","Can I try it on?"],["Solo estoy mirando","I'm just looking"],["Me lo llevo","I'll take it"],["¿Me hace un descuento?","Can you give me a discount?"]]},
+  {cat:"Emergency",items:[["¡Ayuda!","Help!"],["¡Socorro!","Help! (urgent)"],["Llama a la policía","Call the police"],["Llama una ambulancia","Call an ambulance"],["Me duele aquí","It hurts here"],["Necesito un médico","I need a doctor"],["¿Dónde está la farmacia?","Where is the pharmacy?"],["Me han robado","I've been robbed"],["He perdido mi pasaporte","I've lost my passport"]]},
+  {cat:"Small-talk reactions",items:[["¡Qué guay!","Cool!"],["¡Qué bien!","How nice!"],["¡En serio!","Really!"],["No me digas","You don't say"],["¡Anda!","Wow / Really!"],["¿En serio?","Seriously?"],["¡Vaya!","Wow / Well"],["Ni idea","No idea"],["Depende","It depends"],["Puede ser","Could be"],["A ver","Let's see"],["Yo qué sé","How should I know"],["Es lo que hay","It is what it is"]]}
+];
+
+// Slang (España-focused, mostly PG/PG-13)
+const SLANG_DATA = [
+  {cat:"Everyday Spain slang",items:[["Vale","OK (used constantly in Spain)"],["Tío / Tía","Dude / Girl"],["Guay","Cool"],["Molar","To be cool ('me mola' = I like it)"],["Currar","To work (informal)"],["Curro","Job (informal)"],["Pasta","Money (cash)"],["Chulo","Cool (also: cocky)"],["Chaval / Chavala","Kid / young person"],["Peña","Crew / group of people"],["Guiri","Foreign tourist"],["Marcha","Nightlife / party scene"],["Tapear","To go for tapas"],["Botellón","Street drinking (Spanish tradition)"],["Fiesta","Party (also 'mess-up')"],["Follón","A big mess / drama"],["Lío","Mess / trouble / affair"],["Mogollón","A lot / tons of"],["Chungo","Sketchy / bad"],["Pijo / Pija","Posh / preppy"],["Cateto","Country bumpkin (mild insult)"],["Flipar","To freak out / be amazed"],["Empanado","Spaced out"],["Cotilla","Gossip (person)"],["Cotillear","To gossip"],["Chorrada","Silly thing / nonsense"]]},
+  {cat:"Reactions & exclamations",items:[["¡Qué fuerte!","Wow / no way!"],["¡Ostras!","Wow! (soft — literally 'oysters')"],["¡Vaya!","Well! / What a...!"],["¡Anda ya!","Get out of here! / Come on!"],["¡Venga!","Come on!"],["¡Hala!","Wow!"],["¡Toma!","There you go!"],["¡Qué guay!","How cool!"],["¡Qué pasada!","What a blast!"],["¡De locos!","Crazy!"],["¡Mola mazo!","Super cool!"],["¡No me lo puedo creer!","I can't believe it!"]]},
+  {cat:"Feelings & attitude",items:[["Estar hasta las narices","To be fed up"],["Estar sobado","To be exhausted"],["Estar rayado","To be stressed / overthinking"],["Estar de mala leche","To be in a bad mood"],["Tener morro","To be cheeky / bold"],["Ni de coña","No way (informal)"],["Ni pa' ti, ni pa' mí","Not for you, not for me"],["Me la suda","I don't care (casual, mildly crude)"],["Paso","I'm out / not interested"],["Me da igual","I don't mind"],["Está chupado","It's a piece of cake"],["Está tirado","It's dirt cheap / super easy"],["Es la caña","It's awesome"]]},
+  {cat:"Mild swears (very common)",items:[["Joder","Damn / f*** (extremely common in Spain)"],["Coño","Damn (mild expletive)"],["Hostia","Damn / holy... (mild)"],["¡Manda huevos!","Give me a break!"],["Me cago en la leche","I curse the milk (surprisingly common euphemism)"],["De puta madre","Fantastic (vulgar but positive!)"],["Cojonudo","Awesome (crude but not offensive)"],["Estar hecho polvo","To be wrecked (tired)"]]}
+];
+
+// Cultural memes, proverbs & famous quotes (Spain/European Spanish)
+const CULTURAL_DATA = [
+  {cat:"Famous political & royal quotes",items:[
+    ["¿Por qué no te callas?","Why don't you shut up? — King Juan Carlos I to Hugo Chávez, 2007 (Ibero-American Summit)"],
+    ["España va bien","Spain is doing well — José María Aznar's political slogan (1996-2004)"],
+    ["Puedo prometer y prometo","I can promise, and I promise — Adolfo Suárez (Transition era)"],
+    ["Váyase, Sr. González","Get out, Mr. González — Aznar to Felipe González in Parliament"],
+    ["Manda huevos","Give me a break — José María Trillo (caught on hot mic in 1997)"],
+    ["Sí, se puede","Yes we can — Podemos party slogan"],
+    ["No es no","No means no — feminist rallying cry"]
+  ]},
+  {cat:"Classic refranes (proverbs)",items:[
+    ["A quien madruga, Dios le ayuda","God helps those who rise early"],
+    ["En boca cerrada no entran moscas","No flies enter a closed mouth (= keep quiet)"],
+    ["Más vale tarde que nunca","Better late than never"],
+    ["Al mal tiempo, buena cara","In bad weather, put on a good face"],
+    ["Ojos que no ven, corazón que no siente","Eyes that don't see, heart that doesn't feel (= out of sight, out of mind)"],
+    ["Perro ladrador, poco mordedor","A barking dog rarely bites"],
+    ["No hay mal que por bien no venga","Every cloud has a silver lining"],
+    ["A caballo regalado, no le mires el diente","Don't look a gift horse in the mouth"],
+    ["Más vale pájaro en mano que ciento volando","A bird in hand is worth 100 flying"],
+    ["Cría cuervos y te sacarán los ojos","Raise crows and they'll peck out your eyes"],
+    ["Dime con quién andas y te diré quién eres","Tell me who you walk with and I'll tell you who you are"],
+    ["El que ríe último, ríe mejor","He who laughs last, laughs best"],
+    ["El que no arriesga, no gana","He who doesn't risk, doesn't win"],
+    ["A mal tiempo buena cara","In hard times, a good face"],
+    ["Más vale prevenir que curar","Better to prevent than to cure"]
+  ]},
+  {cat:"Modern memes & pop culture",items:[
+    ["¡A por ellos!","Get 'em! (chant, sports)"],
+    ["Yo soy español, español, español","I am Spanish, Spanish, Spanish (soccer chant)"],
+    ["¡Que viva España!","Long live Spain!"],
+    ["Los sábados por la tarde","Saturday afternoons (Los Alcázares meme)"],
+    ["Un vaso de agua","Just a glass of water (Belén Esteban meme)"],
+    ["¿Estamos tontos o qué?","Are we stupid or what?"],
+    ["Que te pires","Get lost (mild)"],
+    ["Yo no he sido","It wasn't me (childhood classic)"],
+    ["A dormir la mona","To sleep it off (after too much drink)"],
+    ["Estoy en Babia","I'm in la-la land (daydreaming)"],
+    ["Me suena a chino","Sounds like Chinese to me (= gibberish)"]
+  ]},
+  {cat:"Regional stereotypes (used affectionately)",items:[
+    ["Los madrileños son chulos","People from Madrid are cocky (self-styled)"],
+    ["Los catalanes son tacaños","Catalans are stingy (stereotype)"],
+    ["Los andaluces son graciosos","Andalusians are funny/charming"],
+    ["Los gallegos hablan retranca","Galicians speak with subtle irony"],
+    ["Los vascos son directos","Basques are direct"]
+  ]}
+];
+
 const PKEY = "dieciseis:v2";
 
 /* Persistence: window.storage inside Claude artifacts, localStorage when
@@ -1716,15 +1815,40 @@ function renderHome(){
   <div class="tools-row">
     <button class="tool-btn" onclick="renderVM()">
       <div class="tt">⚙ Verb machine</div>
-      <div class="ts">147 verbs · 5 tenses · searchable by English or Spanish · categorized</div>
+      <div class="ts">147 verbs · 5 tenses · searchable, categorized</div>
     </button>
     <button class="tool-btn" onclick="renderReview()">
       <div class="tt">↻ Mixed review</div>
-      <div class="ts">Your weakest sentences from all opened lessons, resurfaced</div>
+      <div class="ts">Your weakest sentences resurfaced</div>
     </button>
     <button class="tool-btn" onclick="renderFormsTrainer()">
       <div class="tt">⏱ 7-Forms Trainer</div>
-      <div class="ts">Master past & future tense decision tree</div>
+      <div class="ts">Past &amp; future tense decision tree</div>
+    </button>
+  </div>
+  <div class="section-label">Reference</div>
+  <div class="tools-row">
+    <button class="tool-btn" onclick="renderNumbers()">
+      <div class="tt">🔢 Numbers</div>
+      <div class="ts">Type any number → hear it in Spanish</div>
+    </button>
+    <button class="tool-btn" onclick="renderTime()">
+      <div class="tt">⏰ Time &amp; Dates</div>
+      <div class="ts">Hours, days, months, seasons, time expressions</div>
+    </button>
+    <button class="tool-btn" onclick="renderPhrases()">
+      <div class="tt">💬 Essential phrases</div>
+      <div class="ts">Greetings, restaurant, hotel, emergency &amp; more</div>
+    </button>
+  </div>
+  <div class="tools-row" style="margin-top:10px">
+    <button class="tool-btn" onclick="renderSlang()">
+      <div class="tt">🎭 Slang (España)</div>
+      <div class="ts">Everyday informal Spanish from Spain</div>
+    </button>
+    <button class="tool-btn" onclick="renderCultural()">
+      <div class="tt">📜 Cultural memes</div>
+      <div class="ts">Famous quotes, refranes, ¿Por qué no te callas?</div>
     </button>
   </div>
   <div class="footer-tip">A lesson is complete after its drill deck plus 75%+ on the check. Tap any vocabulary word to hear it. Progress and per-sentence scores are saved on this device.</div>`);
@@ -1773,7 +1897,7 @@ function renderLesson(){
     <button class="tab" onclick="setTab('drill')">Drill</button>
     <button class="tab" onclick="setTab('quiz')">Check</button>
   </div>
-  <div class="note">${L.note}</div>
+  <div class="note">${L.note.replace(/<b>([^<]+)<\/b>/g, (m,txt)=>`<b onclick="speak('${txt.replace(/'/g,"\\'")}')" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px" title="Tap to hear: ${txt.replace(/"/g,'&quot;')}">${txt}</b>`)}</div>
   ${L.tables.map(matrixHTML).join("")}
   <div class="section-label">Vocabulario</div>
   <div class="vocab-list">${vocab}</div>
@@ -2302,6 +2426,75 @@ function advanceFormsDrill(){
 function skipFormsScenario(){
   formsIdx++;
   renderFormsDrill();
+}
+
+/* ---------- reference tools: numbers, phrases, slang, cultural, time ---------- */
+function refItemHTML(es, en){
+  const safe = String(es).replace(/'/g,"\\'");
+  return `<div class="vword" onclick="speak('${safe}')" style="cursor:pointer" title="Tap to hear"><span class="es">${es} 🔊</span><span class="tr">${en}</span></div>`;
+}
+function refCatBlock(cat, items){
+  return `<div class="vm-cat-header">${cat} · ${items.length}</div>
+    <div class="vocab-list">${items.map(([es,en])=>refItemHTML(es,en)).join("")}</div>`;
+}
+
+let numberInput = 42;
+function renderNumbers(){
+  rerender = renderNumbers;
+  const val = numberInput;
+  const spanish = numToSpanish(val);
+  const landmarks = NUMBER_LANDMARKS.map(({n,note})=>
+    `<div class="vword" onclick="speak('${numToSpanish(n).replace(/'/g,"\\'")}')" style="cursor:pointer">
+      <span class="es">${n} → ${numToSpanish(n)} 🔊</span>
+      <span class="tr">${note}</span>
+    </div>`
+  ).join("");
+  h(`${topbar()}
+  <div class="crumb"><button onclick="goHome()">← Home</button><span>Numbers</span></div>
+  <div class="lesson-head"><h2>Numbers</h2><div class="sub">Any number 0-999,999 → Spanish → speak</div></div>
+
+  <div class="matrix">
+    <h4>Type any number</h4>
+    <input type="number" id="num-input" value="${val}" min="0" max="999999" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--board2);color:var(--chalk);margin-bottom:12px;font-family:monospace;font-size:20px;text-align:center" oninput="numberInput=parseInt(this.value)||0;renderNumbers()">
+    <div class="drill-answer" onclick="speak('${spanish.replace(/'/g,"\\'")}')" style="cursor:pointer;font-size:24px;padding:12px" title="Tap to hear">${spanish} 🔊</div>
+  </div>
+
+  <div class="section-label">Key landmarks</div>
+  <div class="vocab-list">${landmarks}</div>`);
+  const inp = document.getElementById("num-input");
+  if(inp && document.activeElement !== inp){/* preserve focus if user is typing */}
+}
+
+function renderTime(){
+  rerender = renderTime;
+  h(`${topbar()}
+  <div class="crumb"><button onclick="goHome()">← Home</button><span>Time & Dates</span></div>
+  <div class="lesson-head"><h2>Time &amp; Dates</h2><div class="sub">Hours, days, months, seasons — tap to hear</div></div>
+  ${TIME_DATA.map(({cat,items})=>refCatBlock(cat, items)).join("")}`);
+}
+
+function renderPhrases(){
+  rerender = renderPhrases;
+  h(`${topbar()}
+  <div class="crumb"><button onclick="goHome()">← Home</button><span>Essential phrases</span></div>
+  <div class="lesson-head"><h2>Essential phrases</h2><div class="sub">Grouped by situation. Tap any phrase to hear it.</div></div>
+  ${PHRASES_DATA.map(({cat,items})=>refCatBlock(cat, items)).join("")}`);
+}
+
+function renderSlang(){
+  rerender = renderSlang;
+  h(`${topbar()}
+  <div class="crumb"><button onclick="goHome()">← Home</button><span>Slang</span></div>
+  <div class="lesson-head"><h2>Slang (España)</h2><div class="sub">Everyday informal Spanish from Spain. Last category is mildly crude.</div></div>
+  ${SLANG_DATA.map(({cat,items})=>refCatBlock(cat, items)).join("")}`);
+}
+
+function renderCultural(){
+  rerender = renderCultural;
+  h(`${topbar()}
+  <div class="crumb"><button onclick="goHome()">← Home</button><span>Cultural memes</span></div>
+  <div class="lesson-head"><h2>Cultural memes &amp; proverbs</h2><div class="sub">Famous quotes, refranes, and modern references — tap to hear the Spanish</div></div>
+  ${CULTURAL_DATA.map(({cat,items})=>refCatBlock(cat, items)).join("")}`);
 }
 
 /* ---------- mixed review (weakness-weighted) ---------- */
