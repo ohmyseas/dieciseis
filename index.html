@@ -1536,6 +1536,173 @@ const CULTURAL_DATA = [
   ]}
 ];
 
+// Grammar glue — the functional/structural layer that makes speech flow
+const GLUE_DATA = [
+  {cat:"Conectores (glue between clauses)",items:[
+    ["porque","because — Voy porque quiero"],
+    ["por eso","that's why — No comí, por eso tengo hambre"],
+    ["así que","so / therefore — Llueve, así que quedémonos"],
+    ["pero","but — Es caro, pero bueno"],
+    ["sin embargo","however / nevertheless"],
+    ["aunque","although / even though — Aunque llueva, iré"],
+    ["a pesar de","in spite of — a pesar del frío"],
+    ["además","besides / moreover"],
+    ["entonces","then / so — Entonces, ¿qué hacemos?"],
+    ["por cierto","by the way"],
+    ["en cambio","on the other hand"],
+    ["mientras que","whereas / while"],
+    ["mientras tanto","meanwhile"],
+    ["o sea","that is / I mean"],
+    ["es decir","that is to say"],
+    ["pues","well… / then"],
+    ["en fin","in short / anyway"],
+    ["de todos modos","anyway / in any case"],
+    ["por lo tanto","therefore"],
+    ["ya que","since / given that"]
+  ]},
+  {cat:"Muletillas y fillers (sound natural, not robotic)",items:[
+    ["pues…","well…"],
+    ["bueno…","well…"],
+    ["a ver…","let's see…"],
+    ["o sea…","I mean…"],
+    ["es que…","it's just that…"],
+    ["vamos…","well… (Spain colloquial)"],
+    ["mira…","look… (attention-getter)"],
+    ["digamos","let's say"],
+    ["en plan…","like… (Spain, teens/20s)"],
+    ["¿sabes?","you know?"],
+    ["¿no?","right?"],
+    ["¿verdad?","true?"],
+    ["¿vale?","OK?"],
+    ["¿me explico?","am I making sense?"],
+    ["hombre…","c'mon / well… (Spain, both sexes)"]
+  ]},
+  {cat:"Estructuras clave (sentence frames you use every sentence)",items:[
+    ["Tengo que + inf","I have to — Tengo que trabajar"],
+    ["Hay que + inf","One must — Hay que estudiar"],
+    ["Voy a + inf","I'm going to — Voy a comer"],
+    ["Acabo de + inf","I just — Acabo de llegar"],
+    ["Estoy + gerundio","I'm currently — Estoy comiendo"],
+    ["Me gusta + inf","I like to — Me gusta viajar"],
+    ["Me encanta + inf","I love to — Me encanta bailar"],
+    ["Se puede + inf","One can — ¿Se puede fumar?"],
+    ["Debería + inf","I should — Debería descansar"],
+    ["Podría + inf","I could — ¿Podría ayudarme?"],
+    ["Quisiera + inf","I'd like to (polite) — Quisiera pedir"],
+    ["Llevo + gerundio","I've been ___ing — Llevo dos años estudiando"],
+    ["Volver a + inf","To do again — Volví a llamar"],
+    ["Empezar a + inf","To start — Empecé a leer"],
+    ["Dejar de + inf","To stop — Dejé de fumar"],
+    ["Tener ganas de + inf","To feel like — Tengo ganas de viajar"]
+  ]},
+  {cat:"Palabras interrogativas (question words)",items:[
+    ["¿Qué?","What? — ¿Qué haces?"],
+    ["¿Quién? / ¿Quiénes?","Who? — ¿Quién es?"],
+    ["¿Dónde?","Where? — ¿Dónde vives?"],
+    ["¿Adónde?","Where to? — ¿Adónde vamos?"],
+    ["¿De dónde?","From where? — ¿De dónde eres?"],
+    ["¿Cuándo?","When? — ¿Cuándo llegas?"],
+    ["¿Cómo?","How? — ¿Cómo estás?"],
+    ["¿Por qué?","Why? — ¿Por qué no?"],
+    ["¿Para qué?","What for? — ¿Para qué sirve?"],
+    ["¿Cuál? / ¿Cuáles?","Which? — ¿Cuál prefieres?"],
+    ["¿Cuánto? / ¿Cuánta?","How much? — ¿Cuánto cuesta?"],
+    ["¿Cuántos? / ¿Cuántas?","How many? — ¿Cuántos años tienes?"],
+    ["¿Hasta cuándo?","Until when? — ¿Hasta cuándo te quedas?"]
+  ]},
+  {cat:"Pronombres — subject / DO / IO / reflexive",items:[
+    ["yo → me / me / me","I → me / to me / myself"],
+    ["tú → te / te / te","you → you / to you / yourself"],
+    ["él → lo / le / se","him → him / to him / himself"],
+    ["ella → la / le / se","her → her / to her / herself"],
+    ["usted → lo(a) / le / se","you formal → you / to you / yourself"],
+    ["nosotros → nos / nos / nos","we → us / to us / ourselves"],
+    ["vosotros → os / os / os","y'all (Spain) → you / to you / yourselves"],
+    ["ellos → los / les / se","them(m) → them / to them / themselves"],
+    ["ellas → las / les / se","them(f) → them / to them / themselves"],
+    ["ustedes → los(as) / les / se","y'all formal → you / to you / yourselves"]
+  ]},
+  {cat:"Preposiciones esenciales",items:[
+    ["a","to, at — Voy a Madrid; a las tres"],
+    ["de","of, from — soy de Rusia; libro de historia"],
+    ["en","in, on, at — en casa, en la mesa"],
+    ["con","with — café con leche"],
+    ["sin","without — café sin azúcar"],
+    ["desde","from, since — desde ayer, desde Madrid"],
+    ["hasta","until, up to — hasta mañana"],
+    ["hacia","toward — hacia el norte"],
+    ["entre","between, among — entre tú y yo"],
+    ["sobre","on, about — sobre la mesa; sobre política"],
+    ["según","according to — según él"],
+    ["durante","during — durante la reunión"],
+    ["antes de","before — antes de comer"],
+    ["después de","after — después de trabajar"],
+    ["cerca de","near — cerca de casa"],
+    ["lejos de","far from — lejos de aquí"]
+  ]},
+  {cat:"Adverbios de frecuencia y cantidad",items:[
+    ["siempre","always"],
+    ["casi siempre","almost always"],
+    ["a menudo","often"],
+    ["a veces","sometimes"],
+    ["de vez en cuando","from time to time"],
+    ["casi nunca","almost never"],
+    ["nunca / jamás","never"],
+    ["mucho / mucha","a lot / much"],
+    ["bastante","quite / enough"],
+    ["poco / poca","little (not much)"],
+    ["demasiado","too much"],
+    ["muy","very (before adj)"],
+    ["algo","somewhat / a little"],
+    ["nada","nothing / not at all"],
+    ["totalmente","totally"],
+    ["absolutamente","absolutely"],
+    ["apenas","barely"],
+    ["quizás / tal vez","maybe / perhaps"]
+  ]}
+];
+
+// Por vs Para — dedicated cheat sheet for the classic Spanish learner headache
+const POR_PARA_DATA = [
+  {cat:"PARA — destination, purpose, deadline, recipient",items:[
+    ["Esto es para ti","This is for you (recipient)"],
+    ["Estudio para aprender","I study in order to learn (purpose)"],
+    ["Salgo para Madrid","I'm leaving for Madrid (destination)"],
+    ["Es para mañana","It's due tomorrow (deadline)"],
+    ["Trabajo para Google","I work for Google (employer)"],
+    ["Un vaso para vino","A wine glass (intended use)"],
+    ["Para mí, es demasiado","For me, it's too much (opinion)"],
+    ["Estoy listo para salir","I'm ready to go out (purpose)"]
+  ]},
+  {cat:"POR — reason, exchange, duration, movement through, agent",items:[
+    ["Lo hago por ti","I do it because of you / for your sake (reason)"],
+    ["Gracias por venir","Thanks for coming (reason)"],
+    ["Diez euros por hora","Ten euros per hour (rate)"],
+    ["Pagué diez euros por el libro","I paid ten euros for the book (exchange)"],
+    ["Estuve allí por tres días","I was there for three days (duration)"],
+    ["Paseo por el parque","I walk through the park (movement)"],
+    ["Por la mañana","In the morning (time of day)"],
+    ["Enviar por correo","To send by mail (means)"],
+    ["Escrito por García","Written by García (agent, passive)"],
+    ["Por favor","Please (fixed expression)"],
+    ["Por cierto","By the way (fixed)"]
+  ]},
+  {cat:"Same-sentence tests — see the difference",items:[
+    ["Lo hice por ti","I did it FOR YOUR SAKE (because of you)"],
+    ["Lo hice para ti","I made it FOR YOU (recipient, it's yours)"],
+    ["Trabajo por dinero","I work IN EXCHANGE FOR money"],
+    ["Trabajo para ganar dinero","I work IN ORDER TO earn money"],
+    ["Viajé por Europa","I traveled AROUND Europe (through)"],
+    ["Viajé para Europa","I traveled TOWARD Europe (destination)"],
+    ["Vamos por Madrid","We're going VIA Madrid"],
+    ["Vamos para Madrid","We're going TO Madrid (final destination)"]
+  ]},
+  {cat:"Quick memory rule",items:[
+    ["POR = motive, motion-through, means, exchange, duration","Think 'BY / THROUGH / BECAUSE-OF'"],
+    ["PARA = purpose, destination, recipient, deadline","Think 'FOR / TOWARD / IN-ORDER-TO'"]
+  ]}
+];
+
 const PKEY = "dieciseis:v2";
 
 /* Persistence: window.storage inside Claude artifacts, localStorage when
@@ -1811,44 +1978,62 @@ function renderHome(){
     <div class="progress-line">${done} / 16 lessons completed</div>
     <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
   </div>
+  <div class="section-label" style="margin-top:26px">📚 Study — 16-lesson intensive</div>
   <div class="grid16">${cells}</div>
+
+  <div class="section-label" style="margin-top:26px">🎯 Practice — drills that build reflex</div>
   <div class="tools-row">
     <button class="tool-btn" onclick="renderVM()">
       <div class="tt">⚙ Verb machine</div>
       <div class="ts">147 verbs · 5 tenses · searchable, categorized</div>
     </button>
+    <button class="tool-btn" onclick="renderFormsTrainer()">
+      <div class="tt">⏱ 7-Forms Trainer</div>
+      <div class="ts">Pick the right tense from context</div>
+    </button>
     <button class="tool-btn" onclick="renderReview()">
       <div class="tt">↻ Mixed review</div>
       <div class="ts">Your weakest sentences resurfaced</div>
     </button>
-    <button class="tool-btn" onclick="renderFormsTrainer()">
-      <div class="tt">⏱ 7-Forms Trainer</div>
-      <div class="ts">Past &amp; future tense decision tree</div>
+  </div>
+
+  <div class="section-label" style="margin-top:26px">🧠 Grammar — the structural glue of speech</div>
+  <div class="tools-row">
+    <button class="tool-btn" onclick="renderGlue()">
+      <div class="tt">🔗 Grammar Glue</div>
+      <div class="ts">Connectors, fillers, sentence frames, pronouns, prepositions</div>
+    </button>
+    <button class="tool-btn" onclick="renderPorPara()">
+      <div class="tt">🎯 Por vs Para</div>
+      <div class="ts">The classic learner headache — solved</div>
     </button>
   </div>
-  <div class="section-label">Reference</div>
+
+  <div class="section-label" style="margin-top:26px">📖 Reference — lookup at a moment's notice</div>
   <div class="tools-row">
     <button class="tool-btn" onclick="renderNumbers()">
       <div class="tt">🔢 Numbers</div>
-      <div class="ts">Type any number → hear it in Spanish</div>
+      <div class="ts">Type any number → Spanish</div>
     </button>
     <button class="tool-btn" onclick="renderTime()">
       <div class="tt">⏰ Time &amp; Dates</div>
-      <div class="ts">Hours, days, months, seasons, time expressions</div>
+      <div class="ts">Hours, days, months, expressions</div>
     </button>
     <button class="tool-btn" onclick="renderPhrases()">
       <div class="tt">💬 Essential phrases</div>
-      <div class="ts">Greetings, restaurant, hotel, emergency &amp; more</div>
+      <div class="ts">Greetings, hotel, restaurant, emergency</div>
     </button>
   </div>
-  <div class="tools-row" style="margin-top:10px">
+
+  <div class="section-label" style="margin-top:26px">🎭 Culture — how Spaniards actually talk</div>
+  <div class="tools-row">
     <button class="tool-btn" onclick="renderSlang()">
       <div class="tt">🎭 Slang (España)</div>
-      <div class="ts">Everyday informal Spanish from Spain</div>
+      <div class="ts">Vale, tío, guay, joder, ¡Ostras!</div>
     </button>
     <button class="tool-btn" onclick="renderCultural()">
       <div class="tt">📜 Cultural memes</div>
-      <div class="ts">Famous quotes, refranes, ¿Por qué no te callas?</div>
+      <div class="ts">Refranes, ¿Por qué no te callas?, famous quotes</div>
     </button>
   </div>
   <div class="footer-tip">A lesson is complete after its drill deck plus 75%+ on the check. Tap any vocabulary word to hear it. Progress and per-sentence scores are saved on this device.</div>`);
@@ -2495,6 +2680,23 @@ function renderCultural(){
   <div class="crumb"><button onclick="goHome()">← Home</button><span>Cultural memes</span></div>
   <div class="lesson-head"><h2>Cultural memes &amp; proverbs</h2><div class="sub">Famous quotes, refranes, and modern references — tap to hear the Spanish</div></div>
   ${CULTURAL_DATA.map(({cat,items})=>refCatBlock(cat, items)).join("")}`);
+}
+
+function renderGlue(){
+  rerender = renderGlue;
+  h(`${topbar()}
+  <div class="crumb"><button onclick="goHome()">← Home</button><span>Grammar Glue</span></div>
+  <div class="lesson-head"><h2>Grammar Glue</h2><div class="sub">The structural layer — connectors, question words, sentence frames, pronouns, prepositions, adverbs, fillers. What makes speech flow.</div></div>
+  ${GLUE_DATA.map(({cat,items})=>refCatBlock(cat, items)).join("")}`);
+}
+
+function renderPorPara(){
+  rerender = renderPorPara;
+  h(`${topbar()}
+  <div class="crumb"><button onclick="goHome()">← Home</button><span>Por vs Para</span></div>
+  <div class="lesson-head"><h2>Por vs Para</h2><div class="sub">The classic Spanish learner headache — solved with 30+ side-by-side examples.</div></div>
+  <div class="note" style="border-left-color:var(--saffron)"><b>The one-line rule:</b> POR = <b>because / through / by / in exchange for</b>. PARA = <b>for / toward / in order to / by (deadline)</b>.</div>
+  ${POR_PARA_DATA.map(({cat,items})=>refCatBlock(cat, items)).join("")}`);
 }
 
 /* ---------- mixed review (weakness-weighted) ---------- */
