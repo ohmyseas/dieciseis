@@ -1622,7 +1622,7 @@ async function testCurrentKey(){
     const r = await fetch("/api/speak", {
       method: "POST",
       headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({text:"Hola. Prueba de voz.", apiKey:ttsKey, voiceId:VOICE_ID})
+      body: JSON.stringify({text:"Hola. Prueba de voz en español.", apiKey:ttsKey, voiceId:VOICE_ID})
     });
     if(!r.ok){
       let body = "";
@@ -1632,16 +1632,21 @@ async function testCurrentKey(){
       renderAudioPanel();
       return;
     }
+    const usedFallback = r.headers.get("X-Voice-Fallback") === "true";
     const blob = await r.blob();
     lastTtsStatus = "ok";
-    lastTtsDetail = "Got audio: " + blob.size + " bytes (" + blob.type + "). Playing now — if you don't hear anything, check device volume and browser tab is not muted.";
+    lastTtsDetail = "Got audio: " + blob.size + " bytes (" + blob.type + ").\n\n"
+      + (usedFallback
+        ? "⚠ Your custom voice 'GB7fZx4ubHWxbBE05abF' is NOT in your ElevenLabs library, so I fell back to the default Sarah voice with multilingual model.\n\nTo use your custom voice: open the share link (below the input) and click 'Add to voices' in ElevenLabs."
+        : "✓ Using your custom voice.")
+      + "\n\nPlaying now — if you hear nothing, check device volume and that this browser tab isn't muted.";
     const url = URL.createObjectURL(blob);
-    audioCache["Hola. Prueba de voz."] = url;
+    audioCache["Hola. Prueba de voz en español."] = url;
     renderAudioPanel();
     const audio = new Audio(url);
     audio.play().catch(e=>{
       lastTtsStatus = "error";
-      lastTtsDetail = "Audio downloaded OK but browser blocked playback: " + e.message + "\n\nTap the '🔊 Test current key' button again — that satisfies the browser's user-gesture requirement.";
+      lastTtsDetail = "Audio downloaded OK (" + blob.size + " bytes) but browser blocked playback: " + e.message + "\n\nTap the '🔊 Test current key' button again — that satisfies the browser's user-gesture requirement.";
       renderAudioPanel();
     });
   } catch(e){
