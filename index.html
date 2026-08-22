@@ -127,7 +127,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
     <label style="display:block;margin-bottom:10px;font-size:14px;">Voice</label>
     <select id="voice-select" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--board2);color:var(--chalk);margin-bottom:20px;">
       <option value="GB7fZx4ubHWxbBE05abF">Your Spanish Voice (Default)</option>
-      <option value="EXAVITQu4vr4xnSDxMaL">Lola (Castilian Spanish)</option>
       <option value="XrExE9yKIg1WjnnlVkGv">Laura (Latin American Spanish)</option>
     </select>
     <div style="display:flex;gap:10px;justify-content:flex-end;">
@@ -1436,6 +1435,10 @@ async function loadState(){
       formsScores = d.formsScores || {}; formsHideSecondary = d.formsHideSecondary === true;
       elevenLabsApiKey = d.elevenLabsApiKey || null;
       elevenLabsVoiceId = d.elevenLabsVoiceId || "GB7fZx4ubHWxbBE05abF";
+      // Migrate old Lola voice to user's new voice
+      if(elevenLabsVoiceId === "EXAVITQu4vr4xnSDxMaL") {
+        elevenLabsVoiceId = "GB7fZx4ubHWxbBE05abF";
+      }
     }catch(e){}
   }
 }
