@@ -1659,9 +1659,15 @@ function openLesson(i){
 function setTab(t){curTab=t;if(t==="drill")startDrill(lessonDeck(curLesson),"lesson");else if(t==="quiz")startQuiz();else renderLesson();}
 function lessonDeck(i){return LESSONS[i].drills.map((d,di)=>({...d,_l:i,_d:di}));}
 
+const TENSE_MAP = {pres:"present",pret:"preterite",imp:"imperfect",fut:"future"};
+function normalizeTense(t){return TENSE_MAP[t] || t;}
 function matrixHTML(t){
   if(t.rows){return `<div class="matrix"><h4>${t.title}</h4><table>${t.rows.map(r=>`<tr><td class="pron">${r[0]}</td><td class="form">${r[1]}</td></tr>`).join("")}</table></div>`;}
-  const f=VERBS[t.verbKey][t.tense];
+  const verb=VERBS[t.verbKey];
+  if(!verb){console.error('[ERROR] Verb not found:',t.verbKey);return `<div class="matrix"><h4>${t.title}</h4><p style="color:var(--rojo)">Verb data missing: ${t.verbKey}</p></div>`;}
+  const tense=normalizeTense(t.tense);
+  const f=verb[tense];
+  if(!f){console.error('[ERROR] Tense not found:',t.verbKey,tense);return `<div class="matrix"><h4>${t.title}</h4><p style="color:var(--rojo)">Tense data missing: ${tense}</p></div>`;}
   return `<div class="matrix"><h4>${t.title}</h4><table>${PRONOUNS.map((p,i)=>`<tr><td class="pron">${p}</td><td class="form">${f[i]}</td></tr>`).join("")}</table></div>`;
 }
 function renderLesson(){
@@ -1880,7 +1886,7 @@ function answerQuiz(chosen,correct){
 }
 
 /* ---------- verb machine ---------- */
-let vmVerb="ser",vmTense="pres",vmRevealed=new Set();
+let vmVerb="ser",vmTense="present",vmRevealed=new Set();
 function renderVM(){
   rerender=renderVM;
   const verbBtns=Object.keys(VERBS).map(v=>`<button class="chip ${v===vmVerb?'on':''}" onclick="vmSet('${v}',null)">${v}</button>`).join("");
@@ -1902,7 +1908,7 @@ function renderVM(){
     <button class="btn primary" onclick="vmShowAll()">Reveal all</button>
   </div>`);
 }
-function vmSet(v,t){if(v){vmVerb=v;if(!VERBS[v][vmTense])vmTense="pres";}if(t)vmTense=t;vmRevealed=new Set();renderVM();}
+function vmSet(v,t){if(v){vmVerb=v;if(!VERBS[v][vmTense])vmTense="present";}if(t)vmTense=t;vmRevealed=new Set();renderVM();}
 function vmToggle(i){
   if(vmRevealed.has(i)){vmRevealed.delete(i);}else{vmRevealed.add(i);speak(VERBS[vmVerb][vmTense][i]);}
   renderVM();
@@ -1911,6 +1917,8 @@ function vmHideAll(){vmRevealed=new Set();renderVM();}
 function vmShowAll(){vmRevealed=new Set([0,1,2,3,4,5]);renderVM();}
 
 /* ---------- forms trainer ---------- */
+let formsDeck=[],formsIdx=0;
+
 function renderFormsTrainer(){
   rerender = renderFormsTrainer;
   const head = `<div class="crumb"><button onclick="goHome()">← Home</button><span>7-Forms Trainer</span></div>
