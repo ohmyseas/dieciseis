@@ -136,6 +136,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   </div>
 </div>
 <script>
+console.log('[INIT] Dieciséis v2 app loading...');
+
 /* =========================================================
    DIECISÉIS v2 — original content mapped to the classic
    16-lesson intensive sequence. Past tense at lesson 3,
@@ -1537,25 +1539,62 @@ function topbar(){
 function toggleRu(){ruHints=!ruHints;saveState();rerender();}
 function toggleTiles(){tiles=!tiles;saveState();rerender();}
 function openSettings(){
-  document.getElementById("settings-modal").style.display = "flex";
-  document.getElementById("api-key-input").value = elevenLabsApiKey || "";
-  document.getElementById("voice-select").value = elevenLabsVoiceId;
+  console.log('[DEBUG] openSettings called');
+  const modal = document.getElementById("settings-modal");
+  const apiInput = document.getElementById("api-key-input");
+  const voiceSelect = document.getElementById("voice-select");
+
+  if (!modal) console.error('[ERROR] settings-modal not found');
+  if (!apiInput) console.error('[ERROR] api-key-input not found');
+  if (!voiceSelect) console.error('[ERROR] voice-select not found');
+
+  if(modal) modal.style.display = "flex";
+  if(apiInput) apiInput.value = elevenLabsApiKey || "";
+  if(voiceSelect) voiceSelect.value = elevenLabsVoiceId;
+
+  console.log('[DEBUG] Settings modal opened. Current voice:', elevenLabsVoiceId);
 }
 function closeSettings(){
   document.getElementById("settings-modal").style.display = "none";
 }
 function saveSettings(){
-  const apiKey = document.getElementById("api-key-input").value.trim();
-  const voiceId = document.getElementById("voice-select").value;
+  console.log('[DEBUG] saveSettings called');
+  const apiKeyInput = document.getElementById("api-key-input");
+  const voiceSelectEl = document.getElementById("voice-select");
+
+  if (!apiKeyInput) {
+    console.error('[ERROR] api-key-input element not found');
+    return;
+  }
+  if (!voiceSelectEl) {
+    console.error('[ERROR] voice-select element not found');
+    return;
+  }
+
+  const apiKey = apiKeyInput.value.trim();
+  const voiceId = voiceSelectEl.value;
+
+  console.log('[DEBUG] API key length:', apiKey.length);
+  console.log('[DEBUG] Voice ID:', voiceId);
+
   if(!apiKey){
+    console.warn('[WARNING] API key is empty');
     alert("Please enter ElevenLabs API key");
     return;
   }
+
   elevenLabsApiKey = apiKey;
   elevenLabsVoiceId = voiceId;
+  console.log('[DEBUG] Settings updated in memory');
+
   saveState();
+  console.log('[DEBUG] State saved to localStorage');
+
   testTTS();  // Play test audio
+  console.log('[DEBUG] Test TTS called');
+
   closeSettings();
+  console.log('[DEBUG] Settings modal closed');
 }
 function testTTS(){
   speak("Hola. Soy Lola. Voy a ser tu voz en español.");  // "Hello. I'm Lola. I'll be your Spanish voice."
@@ -1606,7 +1645,17 @@ function goHome(){renderHome();}
 
 /* ---------- lesson ---------- */
 let curLesson=0,curTab="learn";
-function openLesson(i){curLesson=i;curTab="learn";renderLesson();}
+function openLesson(i){
+  console.log('[DEBUG] openLesson called with index:', i);
+  if(i<0||i>15){
+    console.error('[ERROR] Invalid lesson index:', i);
+    return;
+  }
+  curLesson=i;
+  curTab="learn";
+  console.log('[DEBUG] Opening lesson', i+1, 'title:', LESSONS[i]?.title);
+  renderLesson();
+}
 function setTab(t){curTab=t;if(t==="drill")startDrill(lessonDeck(curLesson),"lesson");else if(t==="quiz")startQuiz();else renderLesson();}
 function lessonDeck(i){return LESSONS[i].drills.map((d,di)=>({...d,_l:i,_d:di}));}
 
@@ -1720,11 +1769,31 @@ function renderDrill(){
   h(`${topbar()}${drillHeader()}${body}`);
 }
 function tilePick(i){
+  console.log('[DEBUG] tilePick called with index:', i);
+  if(!tileState){
+    console.error('[ERROR] tileState is null');
+    return;
+  }
+  if(i<0||i>=tileState.bank.length){
+    console.error('[ERROR] Invalid tile index:', i, 'bank length:', tileState.bank.length);
+    return;
+  }
   const t=tileState.bank.splice(i,1)[0];
+  console.log('[DEBUG] Picked tile:', t.w);
   tileState.answer.push(t);tileState.wrong=false;renderDrill();
 }
 function tileBack(i){
+  console.log('[DEBUG] tileBack called with index:', i);
+  if(!tileState){
+    console.error('[ERROR] tileState is null');
+    return;
+  }
+  if(i<0||i>=tileState.answer.length){
+    console.error('[ERROR] Invalid tile index:', i, 'answer length:', tileState.answer.length);
+    return;
+  }
   const t=tileState.answer.splice(i,1)[0];
+  console.log('[DEBUG] Returned tile to bank:', t.w);
   tileState.bank.push(t);tileState.wrong=false;renderDrill();
 }
 function norm(w){return w.toLowerCase();}
@@ -1978,7 +2047,17 @@ function renderReview(){
 }
 
 /* ---------- boot ---------- */
-loadState().then(renderHome);
+console.log('[BOOT] Starting app initialization...');
+console.log('[BOOT] DOM ready. app element:', !!document.getElementById('app'));
+loadState()
+  .then(() => {
+    console.log('[BOOT] loadState complete');
+    renderHome();
+    console.log('[BOOT] renderHome complete - app is ready');
+  })
+  .catch(e => {
+    console.error('[ERROR] Boot failed:', e);
+  });
 </script>
 </body>
 </html>
