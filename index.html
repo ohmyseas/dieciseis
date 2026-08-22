@@ -1027,9 +1027,28 @@ const VERBS = {
     future: ['obtendré', 'obtendrás', 'obtendrá', 'obtendremos', 'obtendréis', 'obtendrán'],
   },
 };
-const TENSE_NAMES = {present:"Presente",preterite:"Pretérito",imperfect:"Imperfecto",future:"Futuro"};
-const TENSE_EN = {present:"Present — I speak",preterite:"Past — I spoke",imperfect:"Imperfect — I used to speak",future:"Future — I will speak"};
-const TENSE_EN_SHORT = {present:"Present",preterite:"Past",imperfect:"Imperfect",future:"Future"};
+const TENSE_NAMES = {present:"Presente",preterite:"Pretérito",imperfect:"Imperfecto",future:"Futuro",conditional:"Condicional"};
+const TENSE_EN = {present:"Present — I speak",preterite:"Past — I spoke",imperfect:"Imperfect — I used to speak",future:"Future — I will speak",conditional:"Conditional — I would speak"};
+const TENSE_EN_SHORT = {present:"Present",preterite:"Past",imperfect:"Imperfect",future:"Future",conditional:"Would"};
+
+// Derive Conditional from Future: same stem, different endings
+// Future endings: -é, -ás, -á, -emos, -éis, -án
+// Conditional endings: -ía, -ías, -ía, -íamos, -íais, -ían
+(function deriveConditional(){
+  const futEnd = ["é","ás","á","emos","éis","án"];
+  const condEnd = ["ía","ías","ía","íamos","íais","ían"];
+  Object.keys(VERBS).forEach(v=>{
+    const fut = VERBS[v].future;
+    if(!fut || fut.length!==6) return;
+    VERBS[v].conditional = fut.map((form,i)=>{
+      const ending = futEnd[i];
+      if(form.endsWith(ending)){
+        return form.slice(0, -ending.length) + condEnd[i];
+      }
+      return form; // fallback if unexpected
+    });
+  });
+})();
 const DISTRACTORS = ["es","está","son","tiene","muy","no","el","la","los","de","en","que","y","con","mi","su","por","a"];
 
 const LESSONS = [
