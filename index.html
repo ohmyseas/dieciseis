@@ -1027,13 +1027,83 @@ const VERBS = {
     future: ['obtendré', 'obtendrás', 'obtendrá', 'obtendremos', 'obtendréis', 'obtendrán'],
   },
 };
-const TENSE_NAMES = {present:"Presente",preterite:"Pretérito",imperfect:"Imperfecto",future:"Futuro",conditional:"Condicional"};
-const TENSE_EN = {present:"Present — I speak",preterite:"Past — I spoke",imperfect:"Imperfect — I used to speak",future:"Future — I will speak",conditional:"Conditional — I would speak"};
-const TENSE_EN_SHORT = {present:"Present",preterite:"Past",imperfect:"Imperfect",future:"Future",conditional:"Would"};
+const TENSE_NAMES = {present:"Presente",preterite:"Pretérito",imperfect:"Imperfecto",future:"Futuro",conditional:"Condicional",subjunctive:"Subjuntivo"};
+const TENSE_EN = {present:"Present — I speak",preterite:"Past — I spoke",imperfect:"Imperfect — I used to speak",future:"Future — I will speak",conditional:"Conditional — I would speak",subjunctive:"Present Subjunctive — (that) I speak"};
+const TENSE_EN_SHORT = {present:"Present",preterite:"Past",imperfect:"Imperfect",future:"Future",conditional:"Would",subjunctive:"Subj."};
 
-// Derive Conditional from Future: same stem, different endings
-// Future endings: -é, -ás, -á, -emos, -éis, -án
-// Conditional endings: -ía, -ías, -ía, -íamos, -íais, -ían
+// Add 35 missing top-frequency verbs (from ~114 top-freq check)
+(function addMissingVerbs(){
+  const spellingChange = {llegar:'gu',pagar:'gu',buscar:'qu',explicar:'qu',tocar:'qu',sacar:'qu',utilizar:'c',realizar:'c',alcanzar:'c'};
+  function conjRegular(inf){
+    const stem = inf.slice(0,-2), type = inf.slice(-2), sp = spellingChange[inf];
+    let yoPret = stem + (type==='ar'?'é':'í');
+    if(sp==='qu') yoPret = stem.slice(0,-1)+'qué';
+    else if(sp==='gu') yoPret = stem.slice(0,-1)+'gué';
+    else if(sp==='c') yoPret = stem.slice(0,-1)+'cé';
+    const out = {};
+    if(type==='ar'){
+      out.present = ['o','as','a','amos','áis','an'].map(e=>stem+e);
+      out.preterite = [yoPret,stem+'aste',stem+'ó',stem+'amos',stem+'asteis',stem+'aron'];
+      out.imperfect = ['aba','abas','aba','ábamos','abais','aban'].map(e=>stem+e);
+    }else{
+      out.present = ['o','es','e',type==='er'?'emos':'imos',type==='er'?'éis':'ís','en'].map(e=>stem+e);
+      out.preterite = [yoPret,stem+'iste',stem+'ió',stem+'imos',stem+'isteis',stem+'ieron'];
+      out.imperfect = ['ía','ías','ía','íamos','íais','ían'].map(e=>stem+e);
+    }
+    out.future = ['é','ás','á','emos','éis','án'].map(e=>inf+e);
+    return out;
+  }
+  const regs = [
+    ['llegar','to arrive','movement'],['pagar','to pay','money'],
+    ['cambiar','to change','actions'],['gustar','to please / to be liked','mind'],
+    ['quedar','to stay / to meet up / to remain','actions'],['buscar','to look for / to search','actions'],
+    ['explicar','to explain','communication'],['intentar','to try / to attempt','actions'],
+    ['preparar','to prepare','daily'],['tocar','to touch / to play (instrument)','creative'],
+    ['sacar','to take out / to get','actions'],['contestar','to answer / to reply','communication'],
+    ['acabar','to finish / to end','actions'],['presentar','to introduce / to present','communication'],
+    ['crear','to create','work'],['formar','to form / to shape','work'],
+    ['aceptar','to accept','actions'],['tratar','to try / to deal with / to treat','actions'],
+    ['considerar','to consider','mind'],['resultar','to result / to turn out','actions'],
+    ['lograr','to achieve / to manage','actions'],['levantar','to lift / to raise','actions'],
+    ['utilizar','to use / to utilize','work'],['realizar','to carry out / to make happen','work'],
+    ['alcanzar','to reach / to catch up','actions'],['continuar','to continue','actions'],
+    ['emprender','to undertake / to start','work'],['existir','to exist','life'],
+    ['ocurrir','to occur / to happen','life'],['descubrir','to discover','mind'],
+    ['partir','to leave / to split','movement'],['dirigir','to direct / to lead','communication']
+  ];
+  regs.forEach(([inf,en,cat])=>{
+    if(!VERBS[inf]) VERBS[inf] = conjRegular(inf);
+    VERB_META[inf] = {en, cat};
+  });
+  // continuar: accented ú in present singular + ellos
+  VERBS.continuar.present = ['continúo','continúas','continúa','continuamos','continuáis','continúan'];
+  // dirigir: g→j in yo present
+  VERBS.dirigir.present[0] = 'dirijo';
+  // Irregulars (hand-specified)
+  VERBS.suponer = {
+    present:['supongo','supones','supone','suponemos','suponéis','suponen'],
+    preterite:['supuse','supusiste','supuso','supusimos','supusisteis','supusieron'],
+    imperfect:['suponía','suponías','suponía','suponíamos','suponíais','suponían'],
+    future:['supondré','supondrás','supondrá','supondremos','supondréis','supondrán']
+  };
+  VERB_META.suponer = {en:'to suppose', cat:'mind'};
+  VERBS['oír'] = {
+    present:['oigo','oyes','oye','oímos','oís','oyen'],
+    preterite:['oí','oíste','oyó','oímos','oísteis','oyeron'],
+    imperfect:['oía','oías','oía','oíamos','oíais','oían'],
+    future:['oiré','oirás','oirá','oiremos','oiréis','oirán']
+  };
+  VERB_META['oír'] = {en:'to hear', cat:'perception'};
+  VERBS.reconocer = {
+    present:['reconozco','reconoces','reconoce','reconocemos','reconocéis','reconocen'],
+    preterite:['reconocí','reconociste','reconoció','reconocimos','reconocisteis','reconocieron'],
+    imperfect:['reconocía','reconocías','reconocía','reconocíamos','reconocíais','reconocían'],
+    future:['reconoceré','reconocerás','reconocerá','reconoceremos','reconoceréis','reconocerán']
+  };
+  VERB_META.reconocer = {en:'to recognize', cat:'mind'};
+})();
+
+// Derive Conditional from Future (same stem, different endings)
 (function deriveConditional(){
   const futEnd = ["é","ás","á","emos","éis","án"];
   const condEnd = ["ía","ías","ía","íamos","íais","ían"];
@@ -1042,12 +1112,41 @@ const TENSE_EN_SHORT = {present:"Present",preterite:"Past",imperfect:"Imperfect"
     if(!fut || fut.length!==6) return;
     VERBS[v].conditional = fut.map((form,i)=>{
       const ending = futEnd[i];
-      if(form.endsWith(ending)){
-        return form.slice(0, -ending.length) + condEnd[i];
-      }
-      return form; // fallback if unexpected
+      if(form.endsWith(ending)) return form.slice(0, -ending.length) + condEnd[i];
+      return form;
     });
   });
+})();
+
+// Derive Present Subjunctive from yo-present indicative
+// Rule: drop -o from yo-present, add opposite-family endings
+//   -AR verbs: e/es/e/emos/éis/en
+//   -ER/-IR verbs: a/as/a/amos/áis/an
+// Auto-preserves irregular stems (tengo → tenga, hago → haga, etc.)
+(function deriveSubjunctive(){
+  Object.keys(VERBS).forEach(inf=>{
+    const v = VERBS[inf];
+    if(!v.present || !v.present[0]) return;
+    const yo = v.present[0];
+    if(!yo.endsWith('o')) return;
+    const stem = yo.slice(0,-1);
+    const type = inf.slice(-2);
+    const endings = (type==='ar')
+      ? ['e','es','e','emos','éis','en']
+      : ['a','as','a','amos','áis','an'];
+    v.subjunctive = endings.map(e => stem + e);
+  });
+  // Fully-irregular subjunctive overrides (yo→o rule doesn't work for these)
+  const overrides = {
+    ser:['sea','seas','sea','seamos','seáis','sean'],
+    estar:['esté','estés','esté','estemos','estéis','estén'],
+    ir:['vaya','vayas','vaya','vayamos','vayáis','vayan'],
+    haber:['haya','hayas','haya','hayamos','hayáis','hayan'],
+    saber:['sepa','sepas','sepa','sepamos','sepáis','sepan'],
+    dar:['dé','des','dé','demos','deis','den'],
+    ver:['vea','veas','vea','veamos','veáis','vean']
+  };
+  Object.keys(overrides).forEach(v=>{ if(VERBS[v]) VERBS[v].subjunctive = overrides[v]; });
 })();
 const DISTRACTORS = ["es","está","son","tiene","muy","no","el","la","los","de","en","que","y","con","mi","su","por","a"];
 
@@ -1703,6 +1802,116 @@ const POR_PARA_DATA = [
   ]}
 ];
 
+// False friends — English cognates that trip up learners
+const FALSE_FRIENDS_DATA = [
+  {cat:"Classic traps — the word means something else!",items:[
+    ["embarazada ≠ embarrassed","means PREGNANT · say 'avergonzado/a' for embarrassed"],
+    ["constipado ≠ constipated","means having a COLD · say 'estreñido' for constipated"],
+    ["éxito ≠ exit","means SUCCESS · say 'salida' for exit"],
+    ["sopa ≠ soap","means SOUP · say 'jabón' for soap"],
+    ["ropa ≠ rope","means CLOTHES · say 'cuerda' for rope"],
+    ["once ≠ once","means ELEVEN (11) · say 'una vez' for once"],
+    ["red ≠ red","means NET / NETWORK · say 'rojo' for red"],
+    ["largo ≠ large","means LONG · say 'grande' for large"],
+    ["carpeta ≠ carpet","means FOLDER · say 'alfombra' for carpet"],
+    ["fábrica ≠ fabric","means FACTORY · say 'tela' for fabric"],
+    ["lectura ≠ lecture","means READING · say 'conferencia' for lecture"],
+    ["librería ≠ library","means BOOKSTORE · say 'biblioteca' for library"],
+    ["pariente ≠ parent","means RELATIVE · say 'padre/madre' for parent"],
+    ["asistir ≠ assist","means ATTEND · say 'ayudar' for assist"],
+    ["decepción ≠ deception","means DISAPPOINTMENT · say 'engaño' for deception"],
+    ["suceso ≠ success","means EVENT · say 'éxito' for success"],
+    ["realizar ≠ realize (mentally)","means CARRY OUT · say 'darse cuenta de' for realize"],
+    ["actualmente ≠ actually","means CURRENTLY · say 'en realidad' for actually"],
+    ["sensible ≠ sensitive","means REASONABLE · say 'sensitivo / susceptible' for sensitive"],
+    ["molestar ≠ molest","means to BOTHER / ANNOY · say 'abusar' for molest"],
+    ["introducir ≠ introduce a person","means INSERT / PUT INTO · say 'presentar' for introducing someone"],
+    ["billón ≠ billion","In Spanish = TRILLION (10^12) · US billion = 'mil millones'"],
+    ["esperar","tricky triple: to WAIT, to HOPE, OR to EXPECT (context decides)"],
+    ["éxito, salida, saludo","success, exit, greeting (all easily confused with English)"]
+  ]}
+];
+
+// Subjunctive — the B2 gateway. Triggers + endings + example bank.
+const SUBJ_DATA = [
+  {cat:"When to use subjunctive",items:[
+    ["Non-real actions","Wishes, doubts, emotions, hypotheticals — NOT statements of fact"],
+    ["The rule of thumb","If it hasn't happened / might not happen / is desired, use subjunctive"],
+    ["Endings: swap families","-AR verbs get -e endings · -ER/-IR verbs get -a endings"],
+    ["Stem trick","Take yo-present, drop -o. Works for MOST irregulars (tengo→tenga, hago→haga, digo→diga)"]
+  ]},
+  {cat:"Wishes & requests (someone want someone else to…)",items:[
+    ["Quiero que + subj","I want (sb) to — Quiero que vengas"],
+    ["Espero que + subj","I hope — Espero que estés bien"],
+    ["Deseo que + subj","I wish — Deseo que tengas suerte"],
+    ["Necesito que + subj","I need (sb) to — Necesito que me ayudes"],
+    ["Prefiero que + subj","I prefer that — Prefiero que salgamos"],
+    ["Te pido que + subj","I ask you to — Te pido que escuches"],
+    ["Ojalá + subj","I wish / hopefully — Ojalá venga pronto"]
+  ]},
+  {cat:"Emotions & reactions",items:[
+    ["Me gusta que + subj","I like that — Me gusta que vengas"],
+    ["Me molesta que + subj","It bothers me that — Me molesta que llegues tarde"],
+    ["Me sorprende que + subj","It surprises me that — Me sorprende que lo sepas"],
+    ["Me alegra que + subj","It makes me happy that — Me alegra que estés aquí"],
+    ["Siento que + subj","I'm sorry that — Siento que no puedas venir"],
+    ["Temo que + subj","I fear that — Temo que sea tarde"],
+    ["Es una lástima que + subj","It's a shame that — Es una lástima que no puedas"]
+  ]},
+  {cat:"Doubt & possibility",items:[
+    ["Dudo que + subj","I doubt — Dudo que venga"],
+    ["No creo que + subj","I don't think — No creo que sea verdad"],
+    ["No pienso que + subj","I don't think — No pienso que sepa"],
+    ["Es posible que + subj","It's possible — Es posible que llueva"],
+    ["Es probable que + subj","It's probable — Es probable que llegue tarde"],
+    ["Puede que + subj","It could be that — Puede que venga"],
+    ["Quizás + subj","Perhaps — Quizás vengan mañana"],
+    ["Tal vez + subj","Maybe — Tal vez sea mejor así"]
+  ]},
+  {cat:"Impersonal expressions",items:[
+    ["Es importante que + subj","It's important that — Es importante que vengas"],
+    ["Es necesario que + subj","It's necessary that — Es necesario que estudies"],
+    ["Es mejor que + subj","It's better that — Es mejor que vayas ahora"],
+    ["Es bueno / malo que + subj","It's good/bad that"],
+    ["Es raro que + subj","It's strange that — Es raro que no conteste"],
+    ["Basta con que + subj","It's enough that — Basta con que vengas"]
+  ]},
+  {cat:"Time & purpose (pending / future actions)",items:[
+    ["cuando + subj (future)","when — Cuando llegue, te llamo"],
+    ["antes de que + subj","before — Antes de que te vayas"],
+    ["hasta que + subj","until — Espero hasta que llegues"],
+    ["en cuanto + subj","as soon as — En cuanto pueda"],
+    ["mientras + subj (future)","while — Mientras yo esté aquí"],
+    ["para que + subj","in order that — Te lo digo para que sepas"],
+    ["a fin de que + subj","so that — A fin de que entiendas"],
+    ["sin que + subj","without — Salió sin que me diera cuenta"]
+  ]},
+  {cat:"Common irregular present subjunctives",items:[
+    ["ser → sea, seas, sea, seamos, seáis, sean","to be (identity)"],
+    ["estar → esté, estés, esté, estemos, estéis, estén","to be (state)"],
+    ["ir → vaya, vayas, vaya, vayamos, vayáis, vayan","to go"],
+    ["haber → haya, hayas, haya, hayamos, hayáis, hayan","to have (aux)"],
+    ["saber → sepa, sepas, sepa, sepamos, sepáis, sepan","to know"],
+    ["dar → dé, des, dé, demos, deis, den","to give"],
+    ["ver → vea, veas, vea, veamos, veáis, vean","to see"],
+    ["tener → tenga, tengas, tenga, tengamos, tengáis, tengan","to have"],
+    ["hacer → haga, hagas, haga, hagamos, hagáis, hagan","to do/make"],
+    ["decir → diga, digas, diga, digamos, digáis, digan","to say"],
+    ["poner → ponga, pongas, ponga, pongamos, pongáis, pongan","to put"],
+    ["venir → venga, vengas, venga, vengamos, vengáis, vengan","to come"]
+  ]},
+  {cat:"Same sentence — indicative vs subjunctive",items:[
+    ["Sé que viene","I KNOW he's coming (fact → indicative)"],
+    ["Espero que venga","I HOPE he comes (wish → subjunctive)"],
+    ["Creo que es verdad","I THINK it's true (belief → indicative)"],
+    ["No creo que sea verdad","I DON'T think it's true (doubt → subjunctive)"],
+    ["Cuando llegue, te llamo","When I arrive (future/pending → subjunctive)"],
+    ["Cuando llego, te llamo","When I arrive (habitual → indicative)"],
+    ["Busco a alguien que hable inglés","Looking for someone who speaks English (hypothetical → subj)"],
+    ["Busco a la persona que habla inglés","Looking for THE person who speaks English (specific → indicative)"]
+  ]}
+];
+
 const PKEY = "dieciseis:v2";
 
 /* Persistence: window.storage inside Claude artifacts, localStorage when
@@ -2001,11 +2210,21 @@ function renderHome(){
   <div class="tools-row">
     <button class="tool-btn" onclick="renderGlue()">
       <div class="tt">🔗 Grammar Glue</div>
-      <div class="ts">Connectors, fillers, sentence frames, pronouns, prepositions</div>
+      <div class="ts">Connectors, fillers, sentence frames, pronouns</div>
     </button>
     <button class="tool-btn" onclick="renderPorPara()">
       <div class="tt">🎯 Por vs Para</div>
       <div class="ts">The classic learner headache — solved</div>
+    </button>
+  </div>
+  <div class="tools-row" style="margin-top:10px">
+    <button class="tool-btn" onclick="renderSubjunctive()">
+      <div class="tt">🌀 Subjunctive</div>
+      <div class="ts">Triggers, endings, B1→B2 gateway</div>
+    </button>
+    <button class="tool-btn" onclick="renderFalseFriends()">
+      <div class="tt">🚨 False Friends</div>
+      <div class="ts">embarazada ≠ embarrassed &amp; other traps</div>
     </button>
   </div>
 
@@ -2697,6 +2916,24 @@ function renderPorPara(){
   <div class="lesson-head"><h2>Por vs Para</h2><div class="sub">The classic Spanish learner headache — solved with 30+ side-by-side examples.</div></div>
   <div class="note" style="border-left-color:var(--saffron)"><b>The one-line rule:</b> POR = <b>because / through / by / in exchange for</b>. PARA = <b>for / toward / in order to / by (deadline)</b>.</div>
   ${POR_PARA_DATA.map(({cat,items})=>refCatBlock(cat, items)).join("")}`);
+}
+
+function renderFalseFriends(){
+  rerender = renderFalseFriends;
+  h(`${topbar()}
+  <div class="crumb"><button onclick="goHome()">← Home</button><span>False Friends</span></div>
+  <div class="lesson-head"><h2>False Friends</h2><div class="sub">Words that look English but mean something else — traveler landmines.</div></div>
+  <div class="note" style="border-left-color:var(--rojo)">These are the classic traps that cause misunderstandings. Read once, laugh at the pregnancy one, remember them forever.</div>
+  ${FALSE_FRIENDS_DATA.map(({cat,items})=>refCatBlock(cat, items)).join("")}`);
+}
+
+function renderSubjunctive(){
+  rerender = renderSubjunctive;
+  h(`${topbar()}
+  <div class="crumb"><button onclick="goHome()">← Home</button><span>Subjunctive</span></div>
+  <div class="lesson-head"><h2>Subjunctive (Subjuntivo)</h2><div class="sub">The mood that separates B1 from B2. Learn the trigger phrases — the endings follow.</div></div>
+  <div class="note" style="border-left-color:var(--saffron)"><b>Every 147 verb in the Verb Machine now has a Subjuntivo tab</b> — tap any verb to see and hear its subjunctive forms.</div>
+  ${SUBJ_DATA.map(({cat,items})=>refCatBlock(cat, items)).join("")}`);
 }
 
 /* ---------- mixed review (weakness-weighted) ---------- */
