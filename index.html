@@ -1028,6 +1028,8 @@ const VERBS = {
   },
 };
 const TENSE_NAMES = {present:"Presente",preterite:"Pretérito",imperfect:"Imperfecto",future:"Futuro"};
+const TENSE_EN = {present:"Present — I speak",preterite:"Past — I spoke",imperfect:"Imperfect — I used to speak",future:"Future — I will speak"};
+const TENSE_EN_SHORT = {present:"Present",preterite:"Past",imperfect:"Imperfect",future:"Future"};
 const DISTRACTORS = ["es","está","son","tiene","muy","no","el","la","los","de","en","que","y","con","mi","su","por","a"];
 
 const LESSONS = [
@@ -1443,16 +1445,37 @@ async function saveState(){
 }
 
 /* ---------- audio (ElevenLabs TTS via Vercel proxy) ---------- */
-const VOICE_ID = "GB7fZx4ubHWxbBE05abF"; // your Spanish voice
+const VOICE_ID = "GB7fZx4ubHWxbBE05abF"; // shared voice: elevenlabs.io/app/voice-lab/share/.../GB7fZx4ubHWxbBE05abF
 let ttsKey = localStorage.getItem("dieciseis:ttsKey") || null;
 const audioCache = {};
 
+function toast(msg, isError){
+  let el = document.getElementById("tts-toast");
+  if(!el){
+    el = document.createElement("div");
+    el.id = "tts-toast";
+    el.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--board3);color:var(--chalk);padding:12px 20px;border-radius:10px;border:1px solid var(--line);z-index:2000;font-size:14px;max-width:90%;box-shadow:0 8px 24px rgba(0,0,0,.4);transition:opacity .3s";
+    document.body.appendChild(el);
+  }
+  el.style.borderColor = isError ? "var(--rojo)" : "var(--verde)";
+  el.style.color = isError ? "var(--rojo)" : "var(--chalk)";
+  el.textContent = msg;
+  el.style.opacity = "1";
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>{el.style.opacity="0";}, 3500);
+}
+
 async function speak(text){
-  if(!text || !ttsKey) return;
+  if(!text) return;
+  if(!ttsKey){
+    // Auto-prompt on first tap
+    toast("Tap the 🔊 button in the top bar to add your ElevenLabs API key.", true);
+    return;
+  }
   const clean = String(text).replace(/[¿¡]/g,"").trim();
   if(!clean) return;
   if(audioCache[clean]){
-    new Audio(audioCache[clean]).play().catch(()=>{});
+    new Audio(audioCache[clean]).play().catch(e=>toast("Browser blocked audio. Tap again.",true));
     return;
   }
   try{
@@ -1461,27 +1484,43 @@ async function speak(text){
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({text:clean,apiKey:ttsKey,voiceId:VOICE_ID})
     });
-    if(!r.ok){console.warn("TTS error",r.status);return;}
+    if(!r.ok){
+      let msg = "Audio failed: HTTP " + r.status;
+      try{const j = await r.json(); if(j.error) msg = j.error.slice(0,140);}catch(e){}
+      if(r.status===401) msg = "API key rejected by ElevenLabs. Tap 🔊 to re-enter.";
+      toast(msg, true);
+      return;
+    }
     const blob = await r.blob();
     const url = URL.createObjectURL(blob);
     audioCache[clean] = url;
-    new Audio(url).play().catch(()=>{});
-  }catch(e){console.warn("TTS failed",e.message);}
+    new Audio(url).play().catch(e=>toast("Browser blocked audio. Tap the sound button again.",true));
+  }catch(e){
+    toast("Network error: " + e.message, true);
+  }
 }
 
 function askForKey(){
   const current = ttsKey || "";
-  const val = prompt("Paste your ElevenLabs API key (starts with sk_...):\n\nGet it free at elevenlabs.io → Profile → API Keys.\n\nLeave empty to disable audio.", current);
+  const val = prompt(
+    "ElevenLabs API key (starts with sk_...)\n\n" +
+    "1) Add the voice to your library: elevenlabs.io/app/voice-lab/share/.../GB7fZx4ubHWxbBE05abF\n" +
+    "2) Get your API key: elevenlabs.io → Profile → API Keys\n" +
+    "3) Paste it below.\n\n" +
+    "Leave empty to disable audio.",
+    current
+  );
   if(val === null) return; // cancelled
   const trimmed = val.trim();
   if(trimmed){
     ttsKey = trimmed;
     localStorage.setItem("dieciseis:ttsKey", ttsKey);
-    speak("Hola. Estoy lista para enseñarte español.");
+    toast("Key saved. Playing test…");
+    speak("Hola. Soy tu voz en español.");
   }else{
     ttsKey = null;
     localStorage.removeItem("dieciseis:ttsKey");
-    alert("Audio disabled. Tap 🔊 anytime to set your key again.");
+    toast("Audio disabled.");
   }
   rerender();
 }
@@ -1584,7 +1623,7 @@ function matrixHTML(t){
 function renderLesson(){
   rerender=renderLesson;
   const L=LESSONS[curLesson];
-  const vocab=L.vocab.map(v=>`<div class="vword" onclick="speak('${v[0].replace(/'/g,"\\'")}')" style="cursor:${ttsKey?'pointer':'default'}"><span class="es">${v[0]}${ttsKey?' 🔊':''}</span><span class="tr">${v[1]}${ruHints?" · "+v[2]:""}</span></div>`).join("");
+  const vocab=L.vocab.map(v=>`<div class="vword" onclick="speak('${v[0].replace(/'/g,"\\'")}')" style="cursor:pointer" title="Tap to hear"><span class="es">${v[0]} 🔊</span><span class="tr">${v[1]}${ruHints?" · "+v[2]:""}</span></div>`).join("");
   h(`${topbar()}
   <div class="crumb"><button onclick="goHome()">← All lessons</button><span>Lesson ${curLesson+1} of 16</span></div>
   <div class="lesson-head"><h2>${L.title}</h2><div class="sub">${L.sub}</div></div>
@@ -1663,7 +1702,7 @@ function renderDrill(){
     ${tileState.solved?"":`<div class="zone-label">Tiles</div><div class="tile-zone">${bankTiles}</div>`}
     <div class="drill-actions">
       ${tileState.solved
-        ? `${ttsKey?`<button class="btn small" onclick="speak(deck[deckIdx].es)">🔊 Hear it</button>`:''}
+        ? `<button class="btn small" onclick="speak(deck[deckIdx].es)">🔊 Hear it</button>
            <button class="btn good" onclick="advanceDrill()">Next ✓</button>`
         : `<button class="btn primary" onclick="checkTiles()">Check</button>
            <button class="btn small" onclick="revealTiles()">Give up — show it</button>`}
@@ -1677,7 +1716,7 @@ function renderDrill(){
     </div>
     <div class="drill-actions">
       ${revealed
-        ? `${ttsKey?`<button class="btn small" onclick="speak(deck[deckIdx].es)">🔊 Hear it</button>`:''}
+        ? `<button class="btn small" onclick="speak(deck[deckIdx].es)">🔊 Hear it</button>
            <button class="btn good" onclick="gradeDrill(true)">Got it ✓</button>
            <button class="btn again" onclick="gradeDrill(false)">Again ↻</button>`
         : `<button class="btn primary" onclick="revealDrill()">Say it aloud, then reveal</button>`}
@@ -1961,21 +2000,35 @@ function vmItemHTML(v){
 }
 function renderVMTable(){
   const meta=VERB_META[vmVerb]||{en:"—",cat:"other"};
-  const tenseBtns=Object.keys(VERBS[vmVerb]).map(t=>`<button class="chip ${t===vmTense?'on':''}" onclick="vmSetTense('${t}')">${TENSE_NAMES[t]||t}</button>`).join("");
+  const tenseBtns=Object.keys(VERBS[vmVerb]).map(t=>{
+    const es=TENSE_NAMES[t]||t;
+    const en=TENSE_EN_SHORT[t]||"";
+    return `<button class="chip ${t===vmTense?'on':''}" onclick="vmSetTense('${t}')">${es}${en?` <span style="opacity:.7;font-size:11px">(${en})</span>`:''}</button>`;
+  }).join("");
+  const currentTenseLabel = TENSE_EN[vmTense] || TENSE_NAMES[vmTense] || vmTense;
   const f=VERBS[vmVerb][vmTense];
   const rows=PRONOUNS.map((p,i)=>{
     const rev=vmRevealed.has(i);
-    return `<div class="vm-row"><span class="vm-pron">${p}</span>
-      <button class="vm-cell ${rev?'revealed':'hidden-cell'}" onclick="vmToggle(${i})">${f[i]}</button></div>`;
+    const form=f[i].replace(/'/g,"\\'");
+    return `<div class="vm-row">
+      <span class="vm-pron">${p}</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="vm-cell ${rev?'revealed':'hidden-cell'}" onclick="vmToggle(${i})">${f[i]}</button>
+        <button class="chip" style="min-height:36px;padding:6px 10px;font-size:13px" onclick="speak('${form}')" title="Play audio">🔊</button>
+      </div>
+    </div>`;
   }).join("");
+  const sentenceForm = f.join(", ");
   h(`${topbar()}
   <div class="crumb"><button onclick="vmBack()">← Back to verb list</button></div>
   <div class="lesson-head"><div class="vm-verb-title">${vmVerb}</div><div class="vm-verb-en">${meta.en}</div></div>
-  <div class="section-label">Tense · Tiempo</div><div class="vm-controls">${tenseBtns}</div>
+  <div class="section-label">Tense · Tiempo — ${currentTenseLabel}</div>
+  <div class="vm-controls">${tenseBtns}</div>
   <div class="vm-grid">${rows}</div>
   <div class="drill-actions">
     <button class="btn" onclick="vmHideAll()">Hide all</button>
     <button class="btn primary" onclick="vmShowAll()">Reveal all</button>
+    <button class="btn small" onclick="speak('${sentenceForm.replace(/'/g,"\\'")}')">🔊 Play all forms</button>
   </div>`);
 }
 function vmSetFilter(v){vmFilter=v;renderVMList();}
