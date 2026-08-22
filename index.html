@@ -1537,37 +1537,123 @@ async function speak(text){
   }
 }
 
-function askForKey(){
-  const current = ttsKey || "";
-  const val = prompt(
-    "Paste your ElevenLabs API KEY (NOT the Key ID).\n\n" +
-    "▸ Go to: elevenlabs.io/app/settings/api-keys\n" +
-    "▸ Click 'Create API Key' (or reveal an existing one)\n" +
-    "▸ Copy the FULL secret — it starts with 'sk_' and is ~50 characters long\n" +
-    "▸ DO NOT paste the short Key ID (that's just a label)\n\n" +
-    "Leave empty to disable audio.",
-    current
-  );
-  if(val === null) return; // cancelled
-  const trimmed = val.trim();
-  if(!trimmed){
-    ttsKey = null;
-    localStorage.removeItem("dieciseis:ttsKey");
-    toast("Audio disabled.");
-    rerender();
+let lastTtsStatus = "not tested";
+let lastTtsDetail = "";
+
+function renderAudioPanel(){
+  rerender = renderAudioPanel;
+  const keyMask = ttsKey ? (ttsKey.slice(0,6) + "…" + ttsKey.slice(-4) + " (" + ttsKey.length + " chars)") : "— none set —";
+  const statusColor = lastTtsStatus==="ok" ? "var(--verde)" : lastTtsStatus==="error" ? "var(--rojo)" : "var(--muted)";
+  h(`${topbar()}
+  <div class="crumb"><button onclick="goHome()">← Home</button><span>Audio setup</span></div>
+  <div class="lesson-head"><h2>Audio setup</h2><div class="sub">Diagnostic panel for ElevenLabs TTS</div></div>
+
+  <div class="note" style="border-left-color:var(--saffron)"><b>3 steps</b> — do all three:</div>
+  <ol style="padding-left:20px;margin-bottom:20px;color:var(--chalk);line-height:1.7;font-size:14.5px">
+    <li><b>Add the voice to your library</b> (one-time, required):
+        <br><a href="https://elevenlabs.io/app/voice-lab/share/9c2082f82459645f9a0701e4f88e21cd57d2d6a3b553cf413039a184422e745b/GB7fZx4ubHWxbBE05abF" target="_blank" style="color:var(--azul);word-break:break-all">Click here — Add "Kravtsov" voice to your library</a>
+        <br><span style="color:var(--muted);font-size:13px">You'll see an "Add to voices" button on ElevenLabs. Click it. Voice ID <code style="background:var(--board3);padding:2px 6px;border-radius:4px">GB7fZx4ubHWxbBE05abF</code> must appear in your account.</span>
+    </li>
+    <li><b>Get your API key:</b>
+        <br><a href="https://elevenlabs.io/app/settings/api-keys" target="_blank" style="color:var(--azul)">elevenlabs.io/app/settings/api-keys</a>
+        <br><span style="color:var(--muted);font-size:13px">Click <b>"Show"</b> or eye icon to reveal the actual key. It's ~50 chars, starts with <code style="background:var(--board3);padding:2px 6px;border-radius:4px">sk_</code>. Do NOT copy the short "Key ID" — that's just the label.</span>
+    </li>
+    <li><b>Paste key below and test:</b></li>
+  </ol>
+
+  <label style="display:block;margin-bottom:8px;font-size:13px;color:var(--muted)">Current key: <span style="color:var(--chalk);font-family:monospace">${keyMask}</span></label>
+  <input id="tts-key-input" type="password" placeholder="sk_..." style="width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--board2);color:var(--chalk);margin-bottom:14px;font-family:monospace;font-size:13px" value="">
+
+  <div class="drill-actions" style="margin-bottom:20px">
+    <button class="btn primary" onclick="saveKeyAndTest()">Save & Test</button>
+    <button class="btn" onclick="testCurrentKey()">Test current key</button>
+    <button class="btn again" onclick="clearKey()">Clear key</button>
+  </div>
+
+  <div class="matrix">
+    <h4>Last test status</h4>
+    <div style="color:${statusColor};font-weight:700;margin-bottom:6px">${lastTtsStatus.toUpperCase()}</div>
+    <div style="color:var(--muted);font-size:13px;word-break:break-word;white-space:pre-wrap">${esc(lastTtsDetail || "(no tests run yet — click a Test button above)")}</div>
+  </div>
+
+  <div class="matrix" style="margin-top:14px">
+    <h4>Diagnostics</h4>
+    <div style="color:var(--muted);font-size:13px;line-height:1.6">
+      Voice ID: <code style="color:var(--chalk)">GB7fZx4ubHWxbBE05abF</code><br>
+      Proxy: <code style="color:var(--chalk)">/api/speak</code><br>
+      Cache entries: <code style="color:var(--chalk)">${Object.keys(audioCache).length}</code>
+    </div>
+  </div>`);
+}
+
+function saveKeyAndTest(){
+  const input = document.getElementById("tts-key-input");
+  if(!input) return;
+  const val = input.value.trim();
+  if(!val){ toast("Paste a key first.", true); return; }
+  ttsKey = val;
+  localStorage.setItem("dieciseis:ttsKey", ttsKey);
+  input.value = "";
+  testCurrentKey();
+}
+
+function clearKey(){
+  ttsKey = null;
+  localStorage.removeItem("dieciseis:ttsKey");
+  lastTtsStatus = "not tested";
+  lastTtsDetail = "";
+  Object.keys(audioCache).forEach(k=>delete audioCache[k]);
+  toast("Key cleared.");
+  renderAudioPanel();
+}
+
+async function testCurrentKey(){
+  if(!ttsKey){
+    lastTtsStatus = "error";
+    lastTtsDetail = "No key saved. Paste one and click Save & Test.";
+    renderAudioPanel();
     return;
   }
-  // Warn if it looks like a key ID rather than the actual key
-  if(trimmed.length < 30){
-    if(!confirm("This looks short for an API key (only " + trimmed.length + " chars). ElevenLabs keys are usually 40-60+ chars. Save anyway?")){
+  lastTtsStatus = "testing";
+  lastTtsDetail = "Calling /api/speak with voice " + VOICE_ID + "...";
+  renderAudioPanel();
+
+  try {
+    const r = await fetch("/api/speak", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({text:"Hola. Prueba de voz.", apiKey:ttsKey, voiceId:VOICE_ID})
+    });
+    if(!r.ok){
+      let body = "";
+      try{ body = await r.text(); }catch(e){}
+      lastTtsStatus = "error";
+      lastTtsDetail = "HTTP " + r.status + "\n\n" + body.slice(0, 800);
+      renderAudioPanel();
       return;
     }
+    const blob = await r.blob();
+    lastTtsStatus = "ok";
+    lastTtsDetail = "Got audio: " + blob.size + " bytes (" + blob.type + "). Playing now — if you don't hear anything, check device volume and browser tab is not muted.";
+    const url = URL.createObjectURL(blob);
+    audioCache["Hola. Prueba de voz."] = url;
+    renderAudioPanel();
+    const audio = new Audio(url);
+    audio.play().catch(e=>{
+      lastTtsStatus = "error";
+      lastTtsDetail = "Audio downloaded OK but browser blocked playback: " + e.message + "\n\nTap the '🔊 Test current key' button again — that satisfies the browser's user-gesture requirement.";
+      renderAudioPanel();
+    });
+  } catch(e){
+    lastTtsStatus = "error";
+    lastTtsDetail = "Network error: " + e.message;
+    renderAudioPanel();
   }
-  ttsKey = trimmed;
-  localStorage.setItem("dieciseis:ttsKey", ttsKey);
-  toast("Key saved. Playing test…");
-  speak("Hola. Soy tu voz en español.");
-  rerender();
+}
+
+// Called from top-bar 🔊 chip: opens the audio panel (formerly a prompt)
+function askForKey(){
+  renderAudioPanel();
 }
 
 /* ---------- helpers ---------- */
