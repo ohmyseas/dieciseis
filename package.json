@@ -1,0 +1,17 @@
+{
+  "name": "dieciseis",
+  "version": "2.0.0",
+  "description": "Spanish learning app - 16-lesson intensive with TTS",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel deploy --prod"
+  },
+  "dependencies": {
+    "@vercel/kv": "latest"
+  },
+  "devDependencies": {
+    "vercel": "latest"
+  }
+}
