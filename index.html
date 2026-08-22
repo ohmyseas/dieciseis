@@ -1503,25 +1503,36 @@ async function speak(text){
 function askForKey(){
   const current = ttsKey || "";
   const val = prompt(
-    "ElevenLabs API key (starts with sk_...)\n\n" +
-    "1) Add the voice to your library: elevenlabs.io/app/voice-lab/share/.../GB7fZx4ubHWxbBE05abF\n" +
-    "2) Get your API key: elevenlabs.io → Profile → API Keys\n" +
-    "3) Paste it below.\n\n" +
+    "Paste your ElevenLabs API KEY (NOT the Key ID).\n\n" +
+    "▸ Go to: elevenlabs.io/app/settings/api-keys\n" +
+    "▸ Click 'Create API Key' (or reveal an existing one)\n" +
+    "▸ Copy the FULL secret — it starts with 'sk_' and is ~50 characters long\n" +
+    "▸ DO NOT paste the short Key ID (that's just a label)\n\n" +
     "Leave empty to disable audio.",
     current
   );
   if(val === null) return; // cancelled
   const trimmed = val.trim();
-  if(trimmed){
-    ttsKey = trimmed;
-    localStorage.setItem("dieciseis:ttsKey", ttsKey);
-    toast("Key saved. Playing test…");
-    speak("Hola. Soy tu voz en español.");
-  }else{
+  if(!trimmed){
     ttsKey = null;
     localStorage.removeItem("dieciseis:ttsKey");
     toast("Audio disabled.");
+    rerender();
+    return;
   }
+  // Validate: real keys start with sk_ and are long
+  if(!trimmed.startsWith("sk_")){
+    toast("That looks like a Key ID, not the API key. The real key starts with 'sk_'. Tap 🔊 again.", true);
+    return;
+  }
+  if(trimmed.length < 40){
+    toast("That key seems too short. Full API keys are ~50 chars. Tap 🔊 again.", true);
+    return;
+  }
+  ttsKey = trimmed;
+  localStorage.setItem("dieciseis:ttsKey", ttsKey);
+  toast("Key saved. Playing test…");
+  speak("Hola. Soy tu voz en español.");
   rerender();
 }
 
